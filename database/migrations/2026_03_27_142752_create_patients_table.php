@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
 
 
-            $table->date('date_of_brith')->nullable();
+            $table->date('date_of_birth')->nullable();
             // 2- Emergency Contact
             $table->string('emergency_contact_name')->nullable();
             $table->string('emergency_contact_phone')->nullable();

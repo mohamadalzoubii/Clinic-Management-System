@@ -17,18 +17,16 @@ return new class extends Migration
 
             $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
             $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
-            
-            
-            $table->date('appointment_date'); 
+
+            $table->date('appointment_date');
             $table->time('start_time');
-            $table->time('end_time'); 
-            
-            
-            $table->string('status')->default(AppointmentStatus::PENDING->value); 
-            
-            
-            $table->text('reason')->nullable(); 
-            $table->text('notes')->nullable(); 
+            $table->time('end_time');
+            $table->boolean('reminder_sent')->default(false);
+
+            $table->string('status')->default(AppointmentStatus::PENDING->value);
+
+            $table->text('reason')->nullable();
+            $table->text('notes')->nullable();
 
             $table->timestamps();
         });

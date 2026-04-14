@@ -3,11 +3,18 @@
 namespace App\Models;
 
 use App\Enums\Medical\AppointmentStatus;
+use App\Traits\Filterable;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Appointment extends Model
 {
+    use Filterable;
+
     protected $fillable = [
         'patient_id',
         'doctor_id',
@@ -17,6 +24,7 @@ class Appointment extends Model
         'status',
         'reason',
         'notes',
+        'reminder_sent',
     ];
 
     public function doctor(): BelongsTo
@@ -27,6 +35,74 @@ class Appointment extends Model
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function consultation(): HasOne
+    {
+        return $this->hasOne(Consultation::class);
+    }
+
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(MedicalAttachment::class, 'attachable');
+    }
+
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    public function scopeBlockingTimeOnDate(Builder $query, Carbon|string $date)
+    {
+        return $query->whereDate('appointment_date', $date)
+            ->whereIn('status', [
+                AppointmentStatus::CONFIRMED,
+                AppointmentStatus::PENDING,
+            ]);
+    }
+
+    public function scopeConflicting(Builder $query, Carbon|string $date, Carbon|string $time)
+    {
+        return $query->whereDate('appointment_date', $date)
+            ->whereTime('start_time', $time)
+            ->whereIn('status', [
+                AppointmentStatus::PENDING,
+                AppointmentStatus::CONFIRMED,
+            ]);
+    }
+
+    public function scopeHasCompletedVisit(Builder $query, int $patientId, int $doctorId)
+    {
+        return $query->where('patient_id', $patientId)
+            ->where('doctor_id', $doctorId)
+            ->whereIn('status', [AppointmentStatus::COMPLETED]);
+    }
+
+    public function scopeToday(Builder $query): Builder
+    {
+        return $query->whereDate('appointment_date', Carbon::today());
+    }
+
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeCompleted(Builder $query): Builder
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === AppointmentStatus::PENDING;
+    }
+
+    public function canBeCancelled(): bool
+    {
+        $appointmentDateTime = Carbon::parse($this->appointment_date->format('Y-m-d').' '.$this->start_time);
+
+        return ! $appointmentDateTime->subHours(2)->isPast();
     }
 
     protected function casts()

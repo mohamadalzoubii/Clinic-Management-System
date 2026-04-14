@@ -20,8 +20,9 @@ return new class extends Migration
             $table->string('education');
             $table->string('certification');
             $table->unsignedInteger('years_of_experience');
+            $table->decimal('session_price', 8, 2)->default(50.00);
             $table->string('license_number')->unique();
-            
+
             $table->timestamps();
         });
     }

@@ -10,33 +10,46 @@ use Illuminate\Validation\ValidationException;
 
 class LoginAction
 {
-    public function execute(LoginUserData $dto)
+    public function execute(LoginUserData $dto, string $expectedRole = 'patient')
     {
         $user = User::where('email', $dto->email)->first();
 
-        if (!$user || !Hash::check($dto->password, $user->password)) {
+        if (! $user || ! Hash::check($dto->password, $user->password)) {
             throw ValidationException::withMessages([
-                'your email or your password is wrong plese try again'
+                'your email or your password is wrong plese try again',
             ]);
         }
 
-        if (!$user->email_verified_at) {
+        if (! $user->email_verified_at) {
             throw ValidationException::withMessages([
-                'your account is not active plese enter the otp code'
+                'your account is not active plese enter the otp code',
             ]);
         }
 
         if ($user->user_status == UserStatus::SUSPENDED) {
-            throw ValidationException::withMessages(['
+            throw ValidationException::withMessages([
+                '
                 your account is suspended for help contact the admin
-            ']);
+            ',
+            ]);
         }
 
-        $token = $user->createToken('API token for' . $user->email)->plainTextToken;
+        if (! $user->hasRole($expectedRole)) {
+            throw ValidationException::withMessages(['you are not allowed to access this page']);
+        }
+
+        if ($expectedRole === 'doctor') {
+            $user->loadMissing('doctor');
+        } else {
+            $user->loadMissing('patient');
+        }
+
+        $token = $user->createToken('API token for'.$user->email)->plainTextToken;
+
         return
             [
                 'user' => $user,
-                'token' => $token
+                'token' => $token,
             ];
     }
 }

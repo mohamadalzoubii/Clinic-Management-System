@@ -7,15 +7,13 @@ use App\Models\User;
 
 class UserPolicy
 {
-   public function update(User $currentUser, User $targetUser): bool
+    public function update(User $currentUser, User $targetUser): bool
     {
-        
+
         if ($currentUser->id === $targetUser->id) {
-            return true; 
+            return true;
         }
 
         return $currentUser->hasPermissionTo(PermissionEnum::UPDATE->value);
     }
-
-    // فكره غير مكتبملو
 }

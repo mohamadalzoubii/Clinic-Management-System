@@ -9,13 +9,14 @@ use App\Actions\Auth\VerifyOtpAction;
 use App\DTOs\Auth\LoginUserData;
 use App\DTOs\Auth\RegisterUserData;
 use App\DTOs\Auth\VerifyOtpData;
+use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\LoginRequest;
 use App\Http\Requests\Api\V1\RegisterRequest;
 use App\Http\Requests\Api\V1\verifyOtpRequest;
 use App\Http\Resources\Api\V1\UserResource;
-use Illuminate\Http\Request;
 use App\Traits\ApiResponses;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -38,7 +39,7 @@ class AuthController extends Controller
         return $this->ok(
             'Your account has been created please check your email to enter the code',
             [
-                'user' => new UserResource($user)
+                'user' => new UserResource($user),
             ]
         );
     }
@@ -59,7 +60,7 @@ class AuthController extends Controller
         return $this->ok(
             'Welcom, your account is active you can login now',
             [
-                'user' => new UserResource($user)
+                'user' => new UserResource($user),
             ]
         );
     }
@@ -73,11 +74,28 @@ class AuthController extends Controller
             password: $validated['password']
         );
 
-        $result = $action->execute($dto);
+        $result = $action->execute($dto, RoleEnum::PATIENT->value);
 
         return $this->ok('Authnticated', [
             'user' => new UserResource($result['user']),
-            'token' => $result['token']
+            'token' => $result['token'],
+        ]);
+    }
+
+    public function DoctorLogin(LoginRequest $request, LoginAction $action)
+    {
+        $validated = $request->validated();
+
+        $dto = new LoginUserData(
+            email: $validated['email'],
+            password: $validated['password']
+        );
+
+        $result = $action->execute($dto, RoleEnum::DOCTOR->value);
+
+        return $this->ok('Authnticated', [
+            'user' => new UserResource($result['user']),
+            'token' => $result['token'],
         ]);
     }
 
