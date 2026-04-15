@@ -35,7 +35,55 @@ class DatabaseSeeder extends Seeder
 
         // 2. Create Roles
         $this->call([RoleSeeder::class]);
+        $doctorUser = User::factory()->create([
 
+            'first_name' => 'doctor',
+
+            'last_name' => 'Test',
+
+            'email' => 'doctor@test.com',
+
+            'password' => Hash::make('password'),
+
+            'user_status' => 'approved',
+
+        ]);
+
+        $doctorUser->assignRole(RoleEnum::DOCTOR->value);
+
+        $doctor = Doctor::factory()->create(['user_id' => $doctorUser->id]);
+
+        DoctorSchedule::factory()->create([
+
+            'doctor_id' => $doctor->id,
+
+            'day_of_week' => 'monday',
+
+            'start_time' => '09:00',
+
+            'end_time' => '12:00',
+
+        ]);
+
+        $patientUser = User::factory()->create([
+
+            'first_name' => 'Patient',
+
+            'last_name' => 'Test',
+
+            'email' => 'patient@test.com',
+
+            'password' => Hash::make('password'),
+
+            'user_status' => 'approved',
+
+        ]);
+
+        $patientUser->assignRole(RoleEnum::PATIENT->value);
+
+        $patient = Patient::factory()->create(['user_id' => $patientUser->id]);
+
+        // 🔥
         // 3. Create Packages
         $packages = [
             ['name' => 'Basic Wellness', 'price' => 50, 'balance_amount' => 60],
