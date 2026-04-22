@@ -22,6 +22,7 @@ class PatientProfileAction
                 'blood_type' => $dto->blood_type,
                 'date_of_birth' => $dto->date_of_birth,
             ]);
+
             return $user;
         });
     }

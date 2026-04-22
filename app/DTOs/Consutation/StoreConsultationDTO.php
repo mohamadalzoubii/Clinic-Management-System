@@ -20,7 +20,7 @@ class StoreConsultationDTO
     public static function fromRequest(Request $request): self
     {
         $medicines = collect($request->validated('medicines', []))
-            ->map(fn(array $item) => PrescriptionItemDTO::fromArray($item));
+            ->map(fn (array $item) => PrescriptionItemDTO::fromArray($item));
 
         return new self(
             notes: $request->validated('notes'),

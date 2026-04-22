@@ -18,6 +18,7 @@ class DoctorResource extends JsonResource
                 'education' => $this->education,
                 'certification' => $this->certification,
                 'years_of_experience' => $this->years_of_experience,
+                'gender' => $this->gender,
                 'license_number' => $this->license_number,
                 'bio' => $this->bio,
                 'session_price' => $this->session_price,

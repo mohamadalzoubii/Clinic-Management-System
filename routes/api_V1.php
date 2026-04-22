@@ -19,7 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:patient')->group(function () {
 
         Route::prefix('patient')->controller(PatientController::class)->group(function () {
-            Route::post('/CompleteProftile', 'CompleteProftile');
+            Route::post('/CompleteProftile', 'completeProftile');
+            Route::put('updateprofile/{patient}', 'updateProfile');
 
         });
 
@@ -36,8 +37,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:doctor')->group(function () {
 
         Route::get('/doctors/dashboard', [DoctorController::class, 'dashboard']);
+        Route::get('/patients', [PatientController::class, 'index']);
+        Route::get('/patients/{patient}', [PatientController::class, 'show']);
+
         Route::prefix('appointments')->controller(ConsultationController::class)->group(function () {
             Route::post('/{appointment}/consultations', 'storeConsultation');
+
         });
     });
 

@@ -22,6 +22,7 @@ class Doctor extends Model
         'years_of_experience',
         'session_price',
         'license_number',
+        'gender',
     ];
 
     public function user(): BelongsTo

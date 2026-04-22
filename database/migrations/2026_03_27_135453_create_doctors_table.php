@@ -22,6 +22,7 @@ return new class extends Migration
             $table->unsignedInteger('years_of_experience');
             $table->decimal('session_price', 8, 2)->default(50.00);
             $table->string('license_number')->unique();
+            $table->string('gender');
 
             $table->timestamps();
         });

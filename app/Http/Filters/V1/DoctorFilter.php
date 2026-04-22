@@ -6,9 +6,14 @@ class DoctorFilter extends QueryFilter
 {
     public function specialization($value)
     {
-        $likeStr = str_replace('*', '%', $value);
+        $specializations = explode(',', $value);
 
-        return $this->builder->where('specialization', 'like', $likeStr);
+        return $this->builder->where(function ($query) use ($specializations) {
+            foreach ($specializations as $spec) {
+                $formattedSpec = str_replace('*', '%', trim($spec));
+                $query->orWhere('specialization', 'like', $formattedSpec);
+            }
+        });
     }
 
     public function search($value)
@@ -17,5 +22,10 @@ class DoctorFilter extends QueryFilter
             $query->where('first_name', 'LIKE', '%'.$value.'%')
                 ->orWhere('last_name', 'LIKE', '%'.$value.'%');
         });
+    }
+
+    public function gender($value)
+    {
+        $this->builder->where('gender', $value);
     }
 }
