@@ -12,9 +12,15 @@ class Consultation extends Model
         'appointment_id',
         'doctor_id',
         'patient_id',
-        'notes',
-        'prescription',
+        'anamnesis',
+        'symptoms',
+        'diagnosis',
         'next_visit_date',
+
+    ];
+
+    protected $casts = [
+        'symptoms' => 'array',
     ];
 
     public function appointment(): BelongsTo
@@ -35,11 +41,6 @@ class Consultation extends Model
     public function prescriptionItems(): HasMany
     {
         return $this->hasMany(prescriptionItem::class);
-    }
-
-    public function prescripionltems(): HasMany
-    {
-        return $this->hasMany(PrescriptionItem::class);
     }
 
     public function scopeWithFullDetails($query)

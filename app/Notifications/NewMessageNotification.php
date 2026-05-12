@@ -37,7 +37,7 @@ class NewMessageNotification extends Notification implements ShouldQueue
         return [
             'title' => 'New Message',
             'body' => $this->message->body,
-            'snder_id' => $this->message->sender_id,
+            'sender_id' => $this->message->sender_user_id,
         ];
     }
 
@@ -50,7 +50,7 @@ class NewMessageNotification extends Notification implements ShouldQueue
     {
         return [
             'message_id' => $this->message->id,
-            'sender_id' => $this->message->sender_id,
+            'sender_id' => $this->message->sender_user_id,
             'text' => $this->message->body,
         ];
     }

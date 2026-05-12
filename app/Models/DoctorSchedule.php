@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
 class DoctorSchedule extends Model
 {
     use HasFactory;
@@ -23,6 +22,23 @@ class DoctorSchedule extends Model
         'status',
     ];
 
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+
+    public function scopeActiveOnDay(Builder $query, string $dayOfWeek)
+    {
+        return $query->where('day_of_week', $dayOfWeek)
+            ->where('status', ScheduleStatus::ACTIVE);
+    }
+
+    public function scopeForDoctorActive(Builder $query, int $doctorId)
+    {
+        return $query->where('doctor_id', $doctorId)
+            ->where('status', ScheduleStatus::ACTIVE);
+    }
+
     protected function casts(): array
     {
         return [
@@ -30,17 +46,5 @@ class DoctorSchedule extends Model
             'status' => ScheduleStatus::class,
             'slot_duration' => 'integer',
         ];
-    }
-
-    public function doctor(): BelongsTo
-    {
-        return $this->belongsTo(Doctor::class);
-    }
-
-
-    public function scopeActiveOnDay(Builder $query, string $dayOfWeek)
-    {
-        return $query->where('day_of_week', $dayOfWeek)
-            ->where('status', ScheduleStatus::ACTIVE);
     }
 }

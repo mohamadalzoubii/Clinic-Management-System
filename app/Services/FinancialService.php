@@ -38,7 +38,7 @@ class FinancialService
     {
         $dto = PayAppointmentData::fromAppointment($appointment);
 
-        if ($dto->patientUser->wallatBalance < $dto->price) {
+        if ($dto->patientUser->walletBalance < $dto->price) {
             throw new BusinessLogicException('You dont have enough balance to pay for this appointment.');
         }
 

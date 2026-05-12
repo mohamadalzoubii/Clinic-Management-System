@@ -9,9 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Conversation extends Model
 {
-    protected $fillable = ['patient_id', 'doctor_id'];
+    protected $fillable = [
+        'patient_id',
+        'doctor_id', 'is_ai',
+    ];
 
-    public function doctor(): belongsTo
+    public function doctor(): BelongsTo
     {
         return $this->beloongsTo(Doctor::class);
     }

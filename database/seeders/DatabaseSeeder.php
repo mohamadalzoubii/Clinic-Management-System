@@ -151,7 +151,12 @@ class DatabaseSeeder extends Seeder
                         'appointment_id' => $appointment->id,
                         'doctor_id' => $doctor->id,
                         'patient_id' => $randomPatient->id,
-                        'notes' => 'Patient presented with '.$faker->word().' pain. Vitals are stable. Advised rest and hydration.',
+
+                        // الحقول الجديدة بدال الـ notes
+                        'anamnesis' => 'Patient presented with '.$faker->word().' pain. Vitals are stable. Advised rest and hydration.',
+                        'symptoms' => [$faker->word(), $faker->word()], // مصفوفة كلمات عشوائية
+                        'diagnosis' => 'General Fatigue',
+
                         'next_visit_date' => $date->copy()->addDays(7)->format('Y-m-d'),
                     ]);
 
@@ -159,17 +164,27 @@ class DatabaseSeeder extends Seeder
                     $consultation->prescriptionItems()->createMany([
                         [
                             'medicine_name' => 'Amoxicillin',
+                            'category' => 'Antibiotic',
                             'dosage' => '500mg',
+                            'form_and_quantity' => '14 capsules',
                             'frequency' => 'Twice daily',
                             'duration' => '7 days',
-                            'notes' => 'Take after meals',
+                            'special_instructions' => 'Take after meals',
+                            'storage_instructions' => 'Store in a cool dry place',
+                            'side_effects' => 'Nausea or mild stomach upset',
+                            'allergy_warnings' => 'Avoid if allergic to penicillin',
                         ],
                         [
                             'medicine_name' => 'Ibuprofen',
+                            'category' => 'NSAID (Painkiller)',
                             'dosage' => '400mg',
+                            'form_and_quantity' => '10 tablets',
                             'frequency' => 'As needed for pain',
                             'duration' => '3 days',
-                            'notes' => 'Do not exceed 3 tablets in 24 hours',
+                            'special_instructions' => 'Do not exceed 3 tablets in 24 hours',
+                            'storage_instructions' => null,
+                            'side_effects' => null,
+                            'allergy_warnings' => null,
                         ],
                     ]);
 

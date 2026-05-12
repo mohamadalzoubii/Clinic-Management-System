@@ -105,6 +105,18 @@ class Appointment extends Model
         return ! $appointmentDateTime->subHours(2)->isPast();
     }
 
+    public function scopeForDoctorAgenda($query, int $doctorId, string $startDate, string $endDate)
+    {
+        return $query->with(['patient.user'])
+            ->where('doctor_id', $doctorId)
+            ->whereBetween('appointment_date', [$startDate, $endDate])
+            ->where('status', [
+                AppointmentStatus::PENDING->value,
+                AppointmentStatus::COMPLETED->value,
+            ])
+            ->orderBy('start_time');
+    }
+
     protected function casts()
     {
         return [

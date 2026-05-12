@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AiChatController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ChatController;
 use App\Http\Controllers\Api\V1\ConsultationController;
+use App\Http\Controllers\Api\V1\DoctorAvailabilityController;
 use App\Http\Controllers\Api\V1\FinancialController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DoctorController;
@@ -40,21 +42,29 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/patients', [PatientController::class, 'index']);
         Route::get('/patients/{patient}', [PatientController::class, 'show']);
 
+        Route::get('/available-days',
+            [DoctorAvailabilityController::class, 'getAvailableDays']);
+
+        Route::get('/available-slots',
+            [DoctorAvailabilityController::class, 'getAvailableSlots']);
+
+        Route::get('/doctor/agenda', [DoctorAvailabilityController::class, 'getAgenda']);
+
         Route::prefix('appointments')->controller(ConsultationController::class)->group(function () {
             Route::post('/{appointment}/consultations', 'storeConsultation');
 
         });
     });
 
-    Route::prefix('appointments')->controller(AppointmentController::class)->group(function () {
+    Route::prefix('chat')->controller(ChatController::class)->group(function () {
+        Route::post('/sendmessages', 'sendMessage');
+        Route::get('/{receiverId}/getmessages', 'getMessages');
 
-        Route::get('/availableslots', 'getAvailableSlots');
     });
 
-    Route::prefix('chat')->controller(ChatController::class)->group(function () {
-        Route::post('/sendmessages', [ChatController::class, 'sendMessage']);
-        Route::get('/{receiverId}/getmessages', [ChatController::class, 'getMessages']);
-
+    Route::prefix('ai-chat')->controller(AiChatController::class)->group(function () {
+        Route::post('/send', 'sendMessage');
+        Route::get('/history', 'getHistory');
     });
 
     Route::prefix('invoices')->controller(FinancialController::class)->group(function () {
@@ -67,6 +77,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/doctors', [DoctorController::class, 'index']);
     Route::get('/doctors/{doctor}', [DoctorController::class, 'show']);
+
+    Route::get('/doctors/{doctor}/available-days', [DoctorAvailabilityController::class, 'getAvailableDays']);
+    Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);
 
     Route::get('/appointments', [AppointmentController::class, 'index']);
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show']);

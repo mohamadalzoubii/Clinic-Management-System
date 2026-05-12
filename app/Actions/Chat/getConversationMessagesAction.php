@@ -15,7 +15,7 @@ class getConversationMessagesAction
     public function execute(User $user, GetMessagesData $dto)
     {
 
-        [$doctorId, $patientId] = $this->service->resolve($user, $dto->receiverId);
+        [$patientId, $doctorId] = $this->service->resolve($user, $dto->receiverId);
 
         $conversation = Conversation::Between($doctorId, $patientId)->first();
 

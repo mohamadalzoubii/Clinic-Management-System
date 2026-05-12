@@ -2,32 +2,34 @@
 
 namespace App\DTOs\prescrionItem;
 
-use Illuminate\Http\Request;
-
 class PrescriptionItemDTO
 {
-    /**
-     * Create a new class instance.
-     */
     public function __construct(
         public readonly string $name,
+        public readonly ?string $category,
         public readonly string $dosage,
-        public readonly string $duration,
+        public readonly ?string $formAndQuantity,
         public readonly string $frequency,
-        public readonly string $itemNotes,
+        public readonly string $duration,
+        public readonly ?string $specialInstructions,
+        public readonly ?string $storageInstructions,
+        public readonly ?string $sideEffects,
+        public readonly ?string $allergyWarnings,
     ) {}
 
-    public static function fromArray(array $data):self {
-        //هون كنت عم تسال ليش ما استخدم الريكوست واستخدم ارييه + انت لسا ما عملت للسجل الطبي تبع المواعيد 
-        //dto
-        //كمان هدفك تعمل  الاكشن تبع الي بتخلي الدكتور يكتب ملاحظات ويحدد موعد جلسه ثانيه ويوصف دواا 
-        // وبعدها هدفك كمان انك تعمل اشعارات تذكير قبل الموعد بفتره وكمان انك تعمل الشات والله االمستعان على كل شي
-       return new self(
+    public static function fromArray(array $data): self
+    {
+        return new self(
             name: $data['name'],
+            category: $data['category'] ?? null,
             dosage: $data['dosage'],
+            formAndQuantity: $data['form_and_quantity'] ?? null,
             frequency: $data['frequency'],
             duration: $data['duration'],
-            itemNotes: $data['item_notes'] ?? null,
+            specialInstructions: $data['special_instructions'] ?? null,
+            storageInstructions: $data['storage_instructions'] ?? null,
+            sideEffects: $data['side_effects'] ?? null,
+            allergyWarnings: $data['allergy_warnings'] ?? null,
         );
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Actions\Medical\Consutation;
 
-use App\DTOs\Consutation\StoreConsultationDTO;
+use App\DTOs\Consultation\StoreConsultationDTO;
 use App\Enums\Medical\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Consultation;
@@ -19,17 +19,29 @@ class StoreConsultationAction
                 'appointment_id' => $appointment->id,
                 'doctor_id' => $appointment->doctor_id,
                 'patient_id' => $appointment->patient_id,
-                'notes' => $dto->notes,
+                'anamnesis' => $dto->anamnesis,
+                'symptoms' => $dto->symptoms,
+                'diagnosis' => $dto->diagnosis,
                 'next_visit_date' => $dto->nextVisitDate,
             ]);
 
             if ($dto->medicines->isNotEmpty()) {
-                $consultation->prescriptionItems()->createMany(
-                    $dto->medicines->map(fn ($m) => [
-                        'medicine_name' => $m->name, 'dosage' => $m->dosage,
-                        'frequency' => $m->frequency, 'duration' => $m->duration, 'notes' => $m->itemNotes,
-                    ])->toArray()
-                );
+                $medicinesData = $dto->medicines->map(function ($medicineDTO) {
+                    return [
+                        'medicine_name' => $medicineDTO->name,
+                        'category' => $medicineDTO->category,
+                        'dosage' => $medicineDTO->dosage,
+                        'form_and_quantity' => $medicineDTO->formAndQuantity,
+                        'frequency' => $medicineDTO->frequency,
+                        'duration' => $medicineDTO->duration,
+                        'special_instructions' => $medicineDTO->specialInstructions,
+                        'storage_instructions' => $medicineDTO->storageInstructions,
+                        'side_effects' => $medicineDTO->sideEffects,
+                        'allergy_warnings' => $medicineDTO->allergyWarnings,
+                    ];
+                })->toArray();
+
+                $consultation->prescriptionItems()->createMany($medicinesData);
             }
 
             return $consultation->load('prescriptionItems');

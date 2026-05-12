@@ -19,11 +19,12 @@ return new class extends Migration
             $table->foreignId('patient_id')->constrained('patients')->cascadeOnDelete();
             $table->foreignId('doctor_id')->constrained('doctors')->cascadeOnDelete();
 
-            $table->text('notes');
-            $table->text('prescription')->nullable();
+            $table->text('anamnesis')->nullable();
+            $table->json('symptoms')->nullable();
+            $table->string('diagnosis')->nullable();
 
             $table->date('next_visit_date')->nullable();
-            
+
             $table->timestamps();
         });
     }

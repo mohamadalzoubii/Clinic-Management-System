@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\Consutation;
+namespace App\DTOs\Consultation;
 
 use App\DTOs\prescrionItem\PrescriptionItemDTO;
 use Illuminate\Http\Request;
@@ -8,11 +8,10 @@ use Illuminate\Support\Collection;
 
 class StoreConsultationDTO
 {
-    /**
-     * Create a new class instance.
-     */
     public function __construct(
-        public readonly string $notes,
+        public readonly ?string $anamnesis,
+        public readonly ?array $symptoms,
+        public readonly ?string $diagnosis,
         public readonly ?string $nextVisitDate,
         public readonly Collection $medicines
     ) {}
@@ -23,10 +22,11 @@ class StoreConsultationDTO
             ->map(fn (array $item) => PrescriptionItemDTO::fromArray($item));
 
         return new self(
-            notes: $request->validated('notes'),
+            anamnesis: $request->validated('anamnesis'),
+            symptoms: $request->validated('symptoms'),
+            diagnosis: $request->validated('diagnosis'),
             nextVisitDate: $request->validated('next_visit_date'),
             medicines: $medicines,
-
         );
     }
 }

@@ -12,23 +12,29 @@ class ConsultationResource extends JsonResource
         return [
             'type' => 'consultation',
             'id' => (string) $this->id,
-
             'attributes' => [
-
                 'appointment_id' => $this->appointment_id,
-                'notes' => $this->notes,
+                'anamnesis' => $this->anamnesis,
+                'symptoms' => $this->symptoms,
+                'diagnosis' => $this->diagnosis,
                 'next_visit_date' => $this->next_visit_date,
                 'created_at' => $this->created_at->format('Y-m-d H:i A'),
             ],
-
             'relationships' => [
                 'medicines' => $this->whenLoaded('prescriptionItems', function () {
                     return $this->prescriptionItems->map(fn ($item) => [
                         'name' => $item->medicine_name,
+                        'category' => $item->category,
                         'dosage' => $item->dosage,
+                        'form_and_quantity' => $item->form_and_quantity,
                         'frequency' => $item->frequency,
                         'duration' => $item->duration,
-                        'item_notes' => $item->notes,
+                        'details' => [
+                            'special_instructions' => $item->special_instructions,
+                            'storage' => $item->storage_instructions,
+                            'side_effects' => $item->side_effects,
+                            'allergy_warning' => $item->allergy_warnings,
+                        ],
                     ]);
                 }),
                 'patient_attachments' => $this->whenLoaded('appointment', function () {
@@ -39,10 +45,6 @@ class ConsultationResource extends JsonResource
                         'url' => asset('storage/'.$file->file_path),
                     ]);
                 }),
-            ],
-
-            'links' => [
-                //                'self' => route('consultations.show', $this->id),
             ],
         ];
     }

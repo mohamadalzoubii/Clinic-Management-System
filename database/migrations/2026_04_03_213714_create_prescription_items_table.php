@@ -17,10 +17,16 @@ return new class extends Migration
             $table->foreignId('consultation_id')->constrained('consultations')->cascadeOnDelete();
 
             $table->string('medicine_name');
+            $table->string('category')->nullable();
             $table->string('dosage');
+            $table->string('form_and_quantity')->nullable();
             $table->string('duration');
             $table->string('frequency');
-            $table->string('notes')->nullable();
+
+            $table->text('special_instructions')->nullable();
+            $table->text('storage_instructions')->nullable();
+            $table->text('side_effects')->nullable();
+            $table->text('allergy_warnings')->nullable();
 
             $table->timestamps();
         });
