@@ -24,6 +24,8 @@ class SendMessageAction
             'is_read' => false,
         ]);
 
+        $message->load('conversation');
+
         broadcast(new MessageSent($message))->toOthers();
 
         $receiverUser = $this->chatService->getReceiverUser($user, $patientId, $doctorId);

@@ -17,19 +17,25 @@ class getConversationMessagesAction
 
         [$patientId, $doctorId] = $this->service->resolve($user, $dto->receiverId);
 
-        $conversation = Conversation::Between($doctorId, $patientId)->first();
+        $conversation = Conversation::Between($patientId, $doctorId)->first();
 
         if (! $conversation) {
-            return Collect([]);
+            return [
+                'conversation_id' => null,
+                'messages' => collect([]),
+            ];
         }
 
         Message::forConversation($conversation->id)
             ->unreadFromOthers($user->id)
             ->update(['is_read' => true]);
 
-        return Message::forConversation($conversation->id)
-            ->orderBy('created_at')
-            ->get();
+        return [
+            'conversation_id' => $conversation->id,
+            'messages' => Message::forConversation($conversation->id)
+                ->orderBy('created_at')
+                ->get(),
+        ];
 
     }
 }

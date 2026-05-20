@@ -17,7 +17,7 @@ class PatientController extends Controller
 
     public function index()
     {
-        return PatientResource::collection(Patient::all());
+        return PatientResource::collection(Patient::with('user')->get());
     }
 
     public function show(Patient $patient)

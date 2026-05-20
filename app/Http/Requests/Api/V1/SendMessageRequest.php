@@ -3,13 +3,16 @@
 namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SendMessageRequest extends FormRequest
 {
     public function rules(): array
     {
+        $receiverTable = $this->user()?->doctor ? 'patients' : 'doctors';
+
         return [
-            'receiverId' => ['required', 'exists:doctors,id'],
+            'receiverId' => ['required', Rule::exists($receiverTable, 'id')],
             'body' => ['required', 'string', 'max:2000'],
         ];
     }

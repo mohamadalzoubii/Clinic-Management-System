@@ -22,16 +22,19 @@ class ChatController extends Controller
         $message = $action->execute($request->user(),
             SendMessageData::fromRequest($request));
 
-        return $this->ok('Message sent successfully', $message);
+        return $this->ok('Message sent successfully', new MessageResource($message));
 
     }
 
     public function getMessages(Request $request, GetConversationMessagesAction $action, $receiverId)
     {
 
-        $messages = $action->execute($request->user(), new GetMessagesData((int) $receiverId));
+        $thread = $action->execute($request->user(), new GetMessagesData((int) $receiverId));
 
-        return $this->ok('Messages fetched successfully', MessageResource::collection($messages));
+        return $this->ok('Messages fetched successfully', [
+            'conversation_id' => $thread['conversation_id'],
+            'messages' => MessageResource::collection($thread['messages']),
+        ]);
 
     }
 }

@@ -44,6 +44,7 @@ class MessageSent implements ShouldBroadcastNow
     {
 
         return [
+            'conversation_id' => $this->message->conversation_id,
             'message' => (new MessageResource($this->message))->resolve(),
         ];
     }
