@@ -15,14 +15,19 @@ class DoctorReview extends Model
         'rating',
     ];
 
-    public function Doctor(): BelongsTo
+    public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
     }
 
-    public function scopeExistsFor(Builder $query, int $doctorId, int $patientId)
+    public function patient(): BelongsTo
     {
-        return $query->where('doctor_id', $doctorId)
-            ->where('patient_id', $patientId);
+        return $this->belongsTo(Patient::class);
+    }
+
+    public function scopeExistsFor(Builder $query, int $patientId, int $doctorId)
+    {
+        return $query->where('patient_id', $patientId)
+            ->where('doctor_id', $doctorId);
     }
 }

@@ -25,6 +25,7 @@ class PatientResource extends JsonResource
                 'emergency_contact_phone' => $this->emergency_contact_phone,
                 'gender' => $this->gender,
                 'blood_type' => $this->blood_type,
+                'appointments_count' => $this->appointments_count ?? null,
 
                 'medical_details' => [
                     'allergies' => $this->allergies,

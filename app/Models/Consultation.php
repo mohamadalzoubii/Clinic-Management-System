@@ -21,6 +21,7 @@ class Consultation extends Model
 
     protected $casts = [
         'symptoms' => 'array',
+        'next_visit_date' => 'date',
     ];
 
     public function appointment(): BelongsTo

@@ -28,4 +28,23 @@ class DoctorFilter extends QueryFilter
     {
         $this->builder->where('gender', $value);
     }
+
+    public function status($value)
+    {
+        $this->builder->whereHas('user', function ($query) use ($value) {
+            $query->where('user_status', $value);
+        });
+    }
+
+    public function wallet_balance($value)
+    {
+        $this->builder->whereHas('user', function ($query) use ($value) {
+            $query->where('wallet_balance', '>=', $value);
+        });
+    }
+
+    public function session_price($value)
+    {
+        $this->builder->where('session_price', $value);
+    }
 }

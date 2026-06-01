@@ -13,6 +13,7 @@ class Invoice extends Model
         'user_id',
         'amount',
         'invoice_number',
+        'entry_type',
         'status',
         'paid_at',
     ];
@@ -31,8 +32,6 @@ class Invoice extends Model
     {
         return [
             'status' => InvoiceStatus::class,
-
-
             'paid_at' => 'datetime',
             'created_at' => 'datetime',
         ];

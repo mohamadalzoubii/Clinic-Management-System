@@ -4,6 +4,8 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Services\VacationService;
+use Carbon\Carbon;
 
 class DoctorResource extends JsonResource
 {
@@ -22,6 +24,7 @@ class DoctorResource extends JsonResource
                 'license_number' => $this->license_number,
                 'bio' => $this->bio,
                 'session_price' => $this->session_price,
+                'on_leave' => app(VacationService::class)->isBlockingDate($this->id, Carbon::today()),
                 'created_at' => $this->created_at?->toISOString(),
                 'updated_at' => $this->updated_at?->toISOString(),
             ],

@@ -19,8 +19,19 @@ class ConsultationController extends Controller
         Appointment $appointment,
         StoreConsultationAction $action
     ) {
-        $consultation = $action->execute($appointment, StoreConsultationDTO::fromRequest($request));
+        $result = $action->execute($appointment, StoreConsultationDTO::fromRequest($request));
 
-        return $this->ok('Consultation saved successfully', new ConsultationResource($consultation));
+        return $this->ok('Consultation saved successfully', [
+            'consultation' => new ConsultationResource($result['consultation']),
+            'payout_invoices' => collect($result['payout_invoices'])->map(fn ($invoice) => [
+                'id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'amount' => $invoice->amount,
+                'status' => $invoice->status?->value ?? $invoice->status,
+                'entry_type' => $invoice->entry_type,
+                'download_url' => url("/api/v1/invoices/{$invoice->id}/download"),
+            ])->values(),
+            'current_balance' => $result['current_balance'],
+        ]);
     }
 }

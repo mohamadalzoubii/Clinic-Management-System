@@ -7,4 +7,5 @@ enum RoleEnum: string
     case ADMIN = 'admin';
     case DOCTOR = 'doctor';
     case PATIENT = 'patient';
+    case SECRETARY = 'secretary';
 }

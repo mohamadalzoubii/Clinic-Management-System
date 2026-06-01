@@ -4,9 +4,27 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 class ConsultationResource extends JsonResource
 {
+    private function normalizeDateValue(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+
+        try {
+            return Carbon::parse($value)->format('Y-m-d');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     public function toArray(Request $request): array
     {
         return [
@@ -17,8 +35,8 @@ class ConsultationResource extends JsonResource
                 'anamnesis' => $this->anamnesis,
                 'symptoms' => $this->symptoms,
                 'diagnosis' => $this->diagnosis,
-                'next_visit_date' => $this->next_visit_date,
-                'created_at' => $this->created_at->format('Y-m-d H:i A'),
+                'next_visit_date' => $this->normalizeDateValue($this->next_visit_date),
+                'created_at' => $this->created_at?->format('Y-m-d H:i A'),
             ],
             'relationships' => [
                 'medicines' => $this->whenLoaded('prescriptionItems', function () {

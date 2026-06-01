@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Appointment\MarkAppointmentNoShowAction;
 use App\Actions\Appointment\CancelAppointmentAction;
 use App\Actions\Appointment\StoreAppointmentAction;
 use App\Actions\Medical\Doctor\GetDoctorAvailableSlotsAction;
@@ -27,7 +28,7 @@ class AppointmentController extends Controller
     public function show(Appointment $appointment)
     {
 
-        return new AppointmentResource($appointment->loadMissing('doctor', 'patient'));
+        return new AppointmentResource($appointment->loadMissing('doctor.user', 'patient.user', 'consultation.prescriptionItems'));
     }
 
     public function getAvailableSlots(GetAvailableSlotsRequest $request, GetDoctorAvailableSlotsAction $action)
@@ -53,18 +54,19 @@ class AppointmentController extends Controller
 
     public function store(StorAppointmentRequest $request, StoreAppointmentAction $action)
     {
-        //        dd($request->allFiles());
-
         $patientId = $request->user()->patient->id;
 
         $dto = StorAppointmentData::formRequset($request);
 
-        $appointment = $action->execute($patientId, $dto);
+        $result = $action->execute($patientId, $dto);
 
         return $this->ok(
             'Appointment booked successfully',
             [
-                new AppointmentResource($appointment),
+                'appointment' => new AppointmentResource($result['appointment']),
+                'invoice_id' => $result['invoice']->id,
+                'invoice_number' => $result['invoice']->invoice_number,
+                'current_balance' => $result['current_balance'],
             ]
         );
     }
@@ -73,13 +75,41 @@ class AppointmentController extends Controller
     {
         $patientId = auth()->user()->patient->id;
 
-        $updatedAppointment = $action->execute($appointment, $patientId);
+        $result = $action->executeForPatient($appointment, $patientId);
 
         return $this->ok(
             'Appointment canceled successfully',
             [
-                new AppointmentResource($updatedAppointment),
+                'appointment' => new AppointmentResource($result['appointment']),
+                'refund_invoice_id' => $result['refund_invoice']->id,
+                'refund_invoice_number' => $result['refund_invoice']->invoice_number,
+                'current_balance' => $result['current_balance'],
             ]
         );
+    }
+
+    public function markNoShow(Appointment $appointment, MarkAppointmentNoShowAction $action)
+    {
+        $doctorId = auth()->user()->doctor->id;
+
+        $updatedAppointment = $action->execute($appointment, $doctorId);
+
+        return $this->ok('Appointment marked as no show successfully.', [
+            'appointment' => new AppointmentResource($updatedAppointment),
+        ]);
+    }
+
+    public function cancelAsDoctor(Appointment $appointment, CancelAppointmentAction $action)
+    {
+        $doctorId = auth()->user()->doctor->id;
+
+        $result = $action->executeForDoctor($appointment, $doctorId);
+
+        return $this->ok('Appointment canceled successfully.', [
+            'appointment' => new AppointmentResource($result['appointment']),
+            'refund_invoice_id' => $result['refund_invoice']->id,
+            'refund_invoice_number' => $result['refund_invoice']->invoice_number,
+            'current_balance' => $result['current_balance'],
+        ]);
     }
 }

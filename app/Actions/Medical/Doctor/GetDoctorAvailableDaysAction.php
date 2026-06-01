@@ -2,38 +2,65 @@
 
 namespace App\Actions\Medical\Doctor;
 
-use App\Models\DoctorSchedule;
+use App\Services\Medical\DoctorScheduleVersionService;
+use App\Services\VacationService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Log;
 
 class GetDoctorAvailableDaysAction
 {
+    public function __construct(
+        private readonly VacationService $vacationService,
+        private readonly DoctorScheduleVersionService $versionService,
+    ) {}
+
     public function execute(int $doctorId, int $daysAhead = 7): array
     {
-        $workingDays = DoctorSchedule::forDoctorActive($doctorId)
-            ->pluck('day_of_week')
-            ->map(fn ($day) => strtolower($day->value ?? $day))
-            ->toArray();
+        $this->vacationService->syncExpiredVacations($doctorId);
 
-        if (empty($workingDays)) {
+        $availableDates = [];
+        $startDate = Carbon::today();
+        $lookAheadDays = max($daysAhead * 14, 30);
+        $searchEndDate = Carbon::today()->addDays($lookAheadDays - 1);
+        $versions = $this->versionService->versionsForDoctor($doctorId);
+
+        if ($versions->isEmpty()) {
             return [];
         }
 
-        $availableDates = [];
-
-        $period = CarbonPeriod::create(Carbon::today(),
-            Carbon::today()->addDays($daysAhead - 1));
+        $period = CarbonPeriod::create($startDate, $searchEndDate);
 
         foreach ($period as $date) {
             $dayName = strtolower($date->englishDayOfWeek);
+            $versionItem = $this->versionService->resolveItemFromCollection($versions, $date);
 
-            if (in_array($dayName, $workingDays)) {
+            if (! $versionItem) {
+                continue;
+            }
+
+            if (config('app.debug')) {
+                $version = $this->versionService->resolveVersionFromCollection($versions, $date);
+
+                Log::debug('Doctor available-days version selected', [
+                    'doctor_id' => $doctorId,
+                    'date' => $date->format('Y-m-d'),
+                    'version_id' => $version?->id,
+                    'effective_from_date' => $version?->effective_from_date?->toDateString(),
+                ]);
+            }
+
+            if (! $this->vacationService->isBlockingDate($doctorId, $date, false)) {
                 $availableDates[] = [
                     'full_date' => $date->format('Y-m-d'),
                     'day_name' => $date->format('D'),
                     'day_number' => $date->format('d'),
                     'month_name' => $date->format('M'),
                 ];
+
+                if (count($availableDates) >= $daysAhead) {
+                    break;
+                }
             }
         }
 

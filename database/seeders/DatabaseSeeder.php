@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\Medical\AppointmentStatus;
+use App\Enums\Medical\VacationStatus;
 use App\Enums\RoleEnum;
 use App\Models\Appointment;
 use App\Models\Consultation;
@@ -12,12 +13,15 @@ use App\Models\Invoice;
 use App\Models\Package;
 use App\Models\Patient;
 use App\Models\Review;
+use App\Models\Vacation;
 use App\Models\User;
+use App\Services\Medical\DoctorScheduleVersionService;
 use Carbon\Carbon;
 use Faker\Factory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Collection;
 use Spatie\Permission\PermissionRegistrar;
 
 // تأكد من وجود المودل
@@ -35,6 +39,8 @@ class DatabaseSeeder extends Seeder
 
         // 2. Create Roles
         $this->call([RoleSeeder::class]);
+        $this->call([AdminAccountSeeder::class]);
+        $this->call([SecretaryAccountSeeder::class]);
         $doctorUser = User::factory()->create([
 
             'first_name' => 'doctor',
@@ -51,7 +57,10 @@ class DatabaseSeeder extends Seeder
 
         $doctorUser->assignRole(RoleEnum::DOCTOR->value);
 
-        $doctor = Doctor::factory()->create(['user_id' => $doctorUser->id]);
+        $doctor = Doctor::factory()->create([
+            'user_id' => $doctorUser->id,
+            'session_price' => 50.00,
+        ]);
 
         DoctorSchedule::factory()->create([
 
@@ -83,12 +92,14 @@ class DatabaseSeeder extends Seeder
 
         $patient = Patient::factory()->create(['user_id' => $patientUser->id]);
 
+        $faker = Factory::create();
+
         // 🔥
         // 3. Create Packages
         $packages = [
-            ['name' => 'Basic Wellness', 'price' => 50, 'balance_amount' => 60],
-            ['name' => 'Premium Care', 'price' => 100, 'balance_amount' => 125],
-            ['name' => 'VIP Family', 'price' => 200, 'balance_amount' => 260],
+            ['name' => 'Basic Wellness', 'price' => 0, 'balance_amount' => 60],
+            ['name' => 'Premium Care', 'price' => 0, 'balance_amount' => 125],
+            ['name' => 'VIP Family', 'price' => 0, 'balance_amount' => 260],
         ];
         foreach ($packages as $pkg) {
             Package::firstOrCreate(['name' => $pkg['name']], $pkg);
@@ -102,7 +113,11 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'wallet_balance' => rand(50, 300), // إعطاء رصيد عشوائي للمرضى
             ])
-            ->each(fn ($user) => $user->assignRole(RoleEnum::PATIENT->value));
+            ;
+
+        foreach ($patients as $user) {
+            $user->assignRole(RoleEnum::PATIENT->value);
+        }
 
         // 5. Create 10 Doctors (With Schedules)
         $doctors = User::factory(10)
@@ -111,10 +126,32 @@ class DatabaseSeeder extends Seeder
                 'user_status' => 'approved',
                 'password' => Hash::make('password'),
             ])
-            ->each(fn ($user) => $user->assignRole(RoleEnum::DOCTOR->value));
+            ;
+
+        foreach ($doctors as $user) {
+            $user->assignRole(RoleEnum::DOCTOR->value);
+        }
+
+        $vacationDoctors = $doctors->take(2);
+
+        foreach ($vacationDoctors as $index => $doctorUser) {
+            $this->seedDoctorVacation(
+                $doctorUser->doctor,
+                Carbon::today()->subWeek(),
+                Carbon::today()->addMonths(2),
+                $index === 0 ? 'admin' : 'secretary'
+            );
+        }
+
+        $adminUserId = User::query()->where('email', 'admin@test.com')->value('id');
+
+        $this->seedVersionedAgendaForDoctor($doctor, $patients, $adminUserId);
+
+        foreach ($doctors as $doctorUser) {
+            $this->seedVersionedAgendaForDoctor($doctorUser->doctor, $patients, $adminUserId);
+        }
 
         // 6. Generate "The Living System" (Appointments, Consultations, Prescriptions, Invoices, Reviews)
-        $faker = Factory::create();
         $appointmentStatuses = AppointmentStatus::cases();
 
         // Loop through each doctor to give them an active history
@@ -223,5 +260,181 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+    }
+
+    private function seedVersionedAgendaForDoctor(Doctor $doctor, Collection $patients, ?int $adminUserId = null): void
+    {
+        $faker = Factory::create();
+        $versionService = app(DoctorScheduleVersionService::class);
+
+        $versionService->createVersionFromSchedules(
+            $doctor,
+            [
+                ['day_of_week' => 'monday', 'start_time' => '09:00', 'end_time' => '12:00'],
+                ['day_of_week' => 'tuesday', 'start_time' => '09:00', 'end_time' => '12:00'],
+                ['day_of_week' => 'wednesday', 'start_time' => '09:00', 'end_time' => '12:00'],
+                ['day_of_week' => 'thursday', 'start_time' => '09:00', 'end_time' => '12:00'],
+                ['day_of_week' => 'friday', 'start_time' => '09:00', 'end_time' => '12:00'],
+            ],
+            30,
+            Carbon::today(),
+            $adminUserId,
+        );
+
+        $versionService->createVersionFromSchedules(
+            $doctor,
+            [
+                ['day_of_week' => 'monday', 'start_time' => '10:00', 'end_time' => '14:00'],
+                ['day_of_week' => 'wednesday', 'start_time' => '10:00', 'end_time' => '14:00'],
+                ['day_of_week' => 'friday', 'start_time' => '10:00', 'end_time' => '14:00'],
+            ],
+            30,
+            Carbon::today()->addDays(7),
+            $adminUserId,
+        );
+
+        $currentDates = [
+            ['day_of_week' => 'monday', 'status' => AppointmentStatus::COMPLETED],
+            ['day_of_week' => 'wednesday', 'status' => AppointmentStatus::PENDING],
+            ['day_of_week' => 'friday', 'status' => AppointmentStatus::NO_SHOW],
+        ];
+
+        $futureDates = [
+            ['day_of_week' => 'monday', 'status' => AppointmentStatus::PENDING],
+            ['day_of_week' => 'friday', 'status' => AppointmentStatus::PENDING],
+        ];
+
+        foreach ($currentDates as $definition) {
+            $date = $this->nextAgendaDateAvoidingVacations($doctor, Carbon::today(), $definition['day_of_week']);
+
+            $this->seedAgendaAppointment($doctor, $patients->random()->patient, $faker, $date, $definition['status']);
+        }
+
+        foreach ($futureDates as $definition) {
+            $date = $this->nextAgendaDateAvoidingVacations($doctor, Carbon::today()->addDays(7), $definition['day_of_week']);
+
+            $this->seedAgendaAppointment($doctor, $patients->random()->patient, $faker, $date, $definition['status']);
+        }
+    }
+
+    private function seedAgendaAppointment(Doctor $doctor, Patient $patient, \Faker\Generator $faker, Carbon $date, AppointmentStatus $status): void
+    {
+        $appointment = Appointment::create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_date' => $date->format('Y-m-d'),
+            'start_time' => '10:00:00',
+            'end_time' => '10:30:00',
+            'status' => $status->value,
+            'reason' => $faker->sentence(),
+        ]);
+
+        if ($status === AppointmentStatus::COMPLETED) {
+            $consultation = Consultation::create([
+                'appointment_id' => $appointment->id,
+                'doctor_id' => $doctor->id,
+                'patient_id' => $patient->id,
+                'anamnesis' => 'Patient presented with '.$faker->word().' pain. Vitals are stable. Advised rest and hydration.',
+                'symptoms' => [$faker->word(), $faker->word()],
+                'diagnosis' => 'General Fatigue',
+                'next_visit_date' => $date->copy()->addDays(7)->format('Y-m-d'),
+            ]);
+
+            $consultation->prescriptionItems()->createMany([
+                [
+                    'medicine_name' => 'Amoxicillin',
+                    'category' => 'Antibiotic',
+                    'dosage' => '500mg',
+                    'form_and_quantity' => '14 capsules',
+                    'frequency' => 'Twice daily',
+                    'duration' => '7 days',
+                    'special_instructions' => 'Take after meals',
+                    'storage_instructions' => 'Store in a cool dry place',
+                    'side_effects' => 'Nausea or mild stomach upset',
+                    'allergy_warnings' => 'Avoid if allergic to penicillin',
+                ],
+                [
+                    'medicine_name' => 'Ibuprofen',
+                    'category' => 'NSAID (Painkiller)',
+                    'dosage' => '400mg',
+                    'form_and_quantity' => '10 tablets',
+                    'frequency' => 'As needed for pain',
+                    'duration' => '3 days',
+                    'special_instructions' => 'Do not exceed 3 tablets in 24 hours',
+                    'storage_instructions' => null,
+                    'side_effects' => null,
+                    'allergy_warnings' => null,
+                ],
+            ]);
+
+            Invoice::create([
+                'appointment_id' => $appointment->id,
+                'user_id' => $patient->user_id,
+                'amount' => (float) ($doctor->session_price ?? 50.00),
+                'invoice_number' => 'INV-'.strtoupper($faker->bothify('????-####')),
+                'entry_type' => 'appointment_payment',
+                'status' => 'paid',
+                'paid_at' => $date->copy()->addHours(1),
+            ]);
+        }
+    }
+
+    private function nextDateOnOrAfter(Carbon $baseDate, string $dayOfWeek): Carbon
+    {
+        $date = $baseDate->copy()->startOfDay();
+
+        while (strtolower($date->englishDayOfWeek) !== strtolower($dayOfWeek)) {
+            $date->addDay();
+        }
+
+        return $date;
+    }
+
+    private function nextAgendaDateAvoidingVacations(Doctor $doctor, Carbon $baseDate, string $dayOfWeek): Carbon
+    {
+        $date = $this->nextDateOnOrAfter($baseDate, $dayOfWeek);
+
+        while ($this->isVacationBlockedDate($doctor, $date)) {
+            $blockingVacation = Vacation::query()
+                ->where('doctor_id', $doctor->id)
+                ->blocking()
+                ->get()
+                ->first(fn (Vacation $vacation) => $vacation->overlapsDate($date));
+
+            if (! $blockingVacation) {
+                break;
+            }
+
+            $date = $this->nextDateOnOrAfter(
+                Carbon::parse($blockingVacation->end_date)->addDay(),
+                $dayOfWeek
+            );
+        }
+
+        return $date;
+    }
+
+    private function isVacationBlockedDate(Doctor $doctor, Carbon $date): bool
+    {
+        return Vacation::query()
+            ->where('doctor_id', $doctor->id)
+            ->blocking()
+            ->get()
+            ->contains(fn (Vacation $vacation) => $vacation->overlapsDate($date));
+    }
+
+    private function seedDoctorVacation(Doctor $doctor, Carbon $startDate, Carbon $endDate, string $submittedBy): void
+    {
+        Vacation::updateOrCreate(
+            [
+                'doctor_id' => $doctor->id,
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
+            ],
+            [
+                'status' => VacationStatus::APPROVED,
+                'submitted_by' => $submittedBy,
+            ]
+        );
     }
 }

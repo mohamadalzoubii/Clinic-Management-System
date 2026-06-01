@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Doctor extends Model
 {
-    use Filterable, HasFactory;
+    use Filterable, HasFactory, SoftDeletes;
 
     public $fillable = [
         'user_id',
@@ -35,9 +36,19 @@ class Doctor extends Model
         return $this->hasMany(Appointment::class);
     }
 
+    public function vacations(): HasMany
+    {
+        return $this->hasMany(Vacation::class);
+    }
+
     public function schedules(): HasMany
     {
         return $this->hasMany(DoctorSchedule::class);
+    }
+
+    public function scheduleVersions(): HasMany
+    {
+        return $this->hasMany(DoctorScheduleVersion::class);
     }
 
     public function reviews(): HasMany

@@ -82,6 +82,23 @@ class AuthController extends Controller
         ]);
     }
 
+    public function LoginAsPatientForSecretary(LoginRequest $request, LoginAction $action)
+    {
+        $validated = $request->validated();
+
+        $dto = new LoginUserData(
+            email: $validated['email'],
+            password: $validated['password']
+        );
+
+        $result = $action->execute($dto, RoleEnum::PATIENT->value, false);
+
+        return $this->ok('Authnticated', [
+            'user' => new UserResource($result['user']),
+            'token' => $result['token'],
+        ]);
+    }
+
     public function DoctorLogin(LoginRequest $request, LoginAction $action)
     {
         $validated = $request->validated();
@@ -92,6 +109,40 @@ class AuthController extends Controller
         );
 
         $result = $action->execute($dto, RoleEnum::DOCTOR->value);
+
+        return $this->ok('Authnticated', [
+            'user' => new UserResource($result['user']),
+            'token' => $result['token'],
+        ]);
+    }
+
+    public function AdminLogin(LoginRequest $request, LoginAction $action)
+    {
+        $validated = $request->validated();
+
+        $dto = new LoginUserData(
+            email: $validated['email'],
+            password: $validated['password']
+        );
+
+        $result = $action->execute($dto, RoleEnum::ADMIN->value);
+
+        return $this->ok('Authnticated', [
+            'user' => new UserResource($result['user']),
+            'token' => $result['token'],
+        ]);
+    }
+
+    public function SecretaryLogin(LoginRequest $request, LoginAction $action)
+    {
+        $validated = $request->validated();
+
+        $dto = new LoginUserData(
+            email: $validated['email'],
+            password: $validated['password']
+        );
+
+        $result = $action->execute($dto, RoleEnum::SECRETARY->value);
 
         return $this->ok('Authnticated', [
             'user' => new UserResource($result['user']),

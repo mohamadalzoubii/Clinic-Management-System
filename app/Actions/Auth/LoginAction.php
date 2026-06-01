@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class LoginAction
 {
-    public function execute(LoginUserData $dto, string $expectedRole = 'patient')
+    public function execute(LoginUserData $dto, string $expectedRole = 'patient', bool $requireOtp = true)
     {
         $user = User::where('email', $dto->email)->first();
 
@@ -20,7 +20,7 @@ class LoginAction
             ]);
         }
 
-        if (! $user->email_verified_at) {
+        if ($expectedRole === 'patient' && $requireOtp && ! $user->email_verified_at) {
             throw ValidationException::withMessages([
                 'your account is not active plese enter the otp code',
             ]);
@@ -40,6 +40,10 @@ class LoginAction
 
         if ($expectedRole === 'doctor') {
             $user->loadMissing('doctor');
+        } elseif ($expectedRole === 'admin') {
+            $user->loadMissing('admin');
+        } elseif ($expectedRole === 'secretary') {
+            $user->loadMissing('secretary');
         } else {
             $user->loadMissing('patient');
         }

@@ -3,64 +3,79 @@
 namespace App\Actions\Medical\Doctor;
 
 use App\Models\Appointment;
-use App\Models\DoctorSchedule;
+use App\Services\Medical\DoctorScheduleVersionService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Log;
 
 class GetDoctorAgendaAction
 {
+    public function __construct(private readonly DoctorScheduleVersionService $versionService) {}
+
     public function execute(int $doctorId, int $daysAhead = 7): array
     {
+        $startDate = Carbon::today();
+        $lookAheadDays = max($daysAhead * 14, 30);
+        $searchEndDate = Carbon::today()->addDays($lookAheadDays - 1);
+        $versions = $this->versionService->versionsForDoctor($doctorId);
 
-        $workingDays = DoctorSchedule::ForDoctorActive($doctorId)
-            ->pluck('day_of_week')
-            ->map(fn ($day) => strtolower($day->value ?? $day))
-            ->toArray();
-
-        if (empty($workingDays)) {
+        if ($versions->isEmpty()) {
             return [];
         }
-
-        $startDate = Carbon::today();
-        $endDate = Carbon::today()->addDays($daysAhead - 1);
 
         $appointments = Appointment::ForDoctorAgenda(
             $doctorId,
             $startDate->format('Y-m-d'),
-            $endDate->format('Y-m-d'),
+            $searchEndDate->format('Y-m-d'),
         )
             ->get()
-            ->groupBy('appointment_date');
+            ->groupBy(fn ($appointment) => Carbon::parse($appointment->appointment_date)->format('Y-m-d'));
 
         $agenda = [];
-        $period = CarbonPeriod::create($startDate, $endDate);
+        $period = CarbonPeriod::create($startDate, $searchEndDate);
 
         foreach ($period as $date) {
             $dayName = strtolower($date->englishDayOfWeek);
             $dateString = $date->format('Y-m-d');
+            $version = $this->versionService->resolveVersionFromCollection($versions, $date);
+            $versionItem = $version ? $this->versionService->resolveItemFromCollection($versions, $date) : null;
 
-            if (in_array($dayName, $workingDays)) {
+            if (! $versionItem) {
+                continue;
+            }
 
-                $dayAppointments = $appointments->get($dateString, collect());
+            if (config('app.debug')) {
+                Log::debug('Doctor agenda version selected', [
+                    'doctor_id' => $doctorId,
+                    'date' => $dateString,
+                    'version_id' => $version?->id,
+                    'effective_from_date' => $version?->effective_from_date?->toDateString(),
+                ]);
+            }
 
-                $agenda[] = [
-                    'full_date' => $dateString,
-                    'day_name' => $date->format('D'),
-                    'day_number' => $date->format('d'),
-                    'month_name' => $date->format('M'),
+            $dayAppointments = $appointments->get($dateString, collect());
 
-                    'booked_appointments' => $dayAppointments->map(function ($app) {
-                        return [
-                            'appointment_id' => $app->id,
-                            'patient_id' => $app->patient_id,
-                            'patient_name' => $app->patient->user->first_name.' '.$app->patient->user->last_name,
-                            'start_time' => Carbon::parse($app->start_time)->format('H:i'),
-                            'end_time' => Carbon::parse($app->end_time)->format('H:i'),
-                            'status' => $app->status,
-                            'reason' => $app->reason,
-                        ];
-                    })->values()->toArray(),
-                ];
+            $agenda[] = [
+                'full_date' => $dateString,
+                'day_name' => $date->format('D'),
+                'day_number' => $date->format('d'),
+                'month_name' => $date->format('M'),
+
+                'booked_appointments' => $dayAppointments->map(function ($app) {
+                    return [
+                        'appointment_id' => $app->id,
+                        'patient_id' => $app->patient_id,
+                        'patient_name' => $app->patient->user->first_name.' '.$app->patient->user->last_name,
+                        'start_time' => Carbon::parse($app->start_time)->format('H:i'),
+                        'end_time' => Carbon::parse($app->end_time)->format('H:i'),
+                        'status' => $app->status,
+                        'reason' => $app->reason,
+                    ];
+                })->values()->toArray(),
+            ];
+
+            if (count($agenda) >= $daysAhead) {
+                break;
             }
         }
 

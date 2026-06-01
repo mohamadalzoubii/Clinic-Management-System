@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Actions\Medical\Patient\PatientProfileAction;
 use App\DTOs\Patient\PatientProfileData;
+use App\Http\Filters\V1\AppointmentFilter;
+use App\Http\Resources\AppointmentResource;
 use App\Http\Requests\Api\V1\Patient\PatientProfileRequest;
 use App\Http\Requests\Api\V1\Patient\PatientProfileUpdateRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Http\Resources\PatientResource;
+use App\Models\Appointment;
 use App\Models\Patient;
 use App\Traits\ApiResponses;
 
@@ -23,6 +26,21 @@ class PatientController extends Controller
     public function show(Patient $patient)
     {
         return new PatientResource($patient->load('user'));
+    }
+
+    public function appointments(AppointmentFilter $filter)
+    {
+        $patient = request()->user()->patient;
+
+        $appointments = Appointment::query()
+            ->where('patient_id', $patient->id)
+            ->with(['doctor.user', 'patient.user', 'invoices', 'attachments'])
+            ->filter($filter)
+            ->orderByDesc('appointment_date')
+            ->orderByDesc('start_time')
+            ->paginate(8);
+
+        return AppointmentResource::collection($appointments);
     }
 
     public function completeProftile(PatientProfileRequest $request, PatientProfileAction $action)

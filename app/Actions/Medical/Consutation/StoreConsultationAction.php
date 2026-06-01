@@ -6,13 +6,22 @@ use App\DTOs\Consultation\StoreConsultationDTO;
 use App\Enums\Medical\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Consultation;
+use App\Services\FinancialService;
 use Illuminate\Support\Facades\DB;
 
 class StoreConsultationAction
 {
+    public function __construct(private readonly FinancialService $financialService) {}
+
     public function execute(Appointment $appointment, StoreConsultationDTO $dto)
     {
         return DB::transaction(function () use ($appointment, $dto) {
+            $appointment = Appointment::query()
+                ->whereKey($appointment->getKey())
+                ->lockForUpdate()
+                ->with(['doctor.user', 'patient.user'])
+                ->firstOrFail();
+
             $appointment->update(['status' => AppointmentStatus::COMPLETED->value]);
 
             $consultation = Consultation::create([
@@ -44,7 +53,13 @@ class StoreConsultationAction
                 $consultation->prescriptionItems()->createMany($medicinesData);
             }
 
-            return $consultation->load('prescriptionItems');
+            $payoutInvoices = $this->financialService->payoutForCompletion70_30($appointment);
+
+            return [
+                'consultation' => $consultation->load('prescriptionItems'),
+                'payout_invoices' => $payoutInvoices,
+                'current_balance' => $appointment->doctor->user->fresh()->wallet_balance,
+            ];
         });
     }
 }

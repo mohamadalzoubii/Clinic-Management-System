@@ -25,12 +25,47 @@ class FinancialController extends Controller
 
         $package = Package::find($request->package_id);
 
-        $updatedUser = $this->financialService->buyPackage($request->user(), $package);
+        $result = $this->financialService->buyPackageForUser($request->user(), $package);
 
         return $this->ok(
-            ['current_balance' => $updatedUser->wallet_balance],
-            'Wallet recharged successfully.'
+            'Wallet recharged successfully.',
+            [
+                'current_balance' => $result['user']->wallet_balance,
+                'invoice_id' => $result['invoice']->id,
+                'invoice_number' => $result['invoice']->invoice_number,
+            ]
         );
+    }
+
+    public function index(Request $request)
+    {
+        $page = max(1, $request->integer('page', 1));
+        $perPage = max(1, $request->integer('limit', 10));
+
+        $invoices = $request->user()
+            ->invoices()
+            ->latest('id')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $items = collect($invoices->items())->map(fn (Invoice $invoice) => [
+                'id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'amount' => $invoice->amount,
+                'status' => $invoice->status?->value ?? $invoice->status,
+                'entry_type' => $invoice->entry_type,
+                'paid_at' => $invoice->paid_at?->toISOString(),
+                'appointment_id' => $invoice->appointment_id,
+                'download_url' => url("/api/v1/invoices/{$invoice->id}/download"),
+            ]);
+
+        return $this->ok('Invoices retrieved successfully.', [
+            'invoices' => $items,
+            'meta' => [
+                'current_page' => $invoices->currentPage(),
+                'last_page' => $invoices->lastPage(),
+                'total' => $invoices->total(),
+            ],
+        ]);
     }
 
     public function downloadInvoice(Invoice $invoice)

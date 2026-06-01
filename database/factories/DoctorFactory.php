@@ -18,6 +18,7 @@ class DoctorFactory extends Factory
             ]),
             'certification' => $this->faker->word().' Board Certified',
             'years_of_experience' => $this->faker->numberBetween(2, 30),
+            'session_price' => 50.00,
             'license_number' => $this->faker->unique()->numerify('MD-#####'),
             'gender' => $this->faker->randomElement([Gender::MALE->value, Gender::FEMALE->value]),
 

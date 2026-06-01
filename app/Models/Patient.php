@@ -5,15 +5,17 @@ namespace App\Models;
 use App\Enums\Medical\AppointmentStatus;
 use App\Enums\Medical\BloodType;
 use App\Enums\Medical\Gender;
+use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Patient extends Model
 {
-    use HasFactory;
+    use Filterable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',

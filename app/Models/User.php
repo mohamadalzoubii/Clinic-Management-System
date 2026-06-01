@@ -6,11 +6,13 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Admin;
 
 class User extends Authenticatable
 {
@@ -48,14 +50,29 @@ class User extends Authenticatable
         return $this->hasOne(Doctor::class);
     }
 
+    public function admin(): HasOne
+    {
+        return $this->hasOne(Admin::class);
+    }
+
     public function patient(): HasOne
     {
         return $this->hasOne(Patient::class);
     }
 
+    public function secretary(): HasOne
+    {
+        return $this->hasOne(Secretary::class);
+    }
+
     public function invoice(): HasOne
     {
-        return $this->hasOne(Invoice::class);
+        return $this->hasOne(Invoice::class)->latestOfMany();
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     /**

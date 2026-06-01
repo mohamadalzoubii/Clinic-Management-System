@@ -6,27 +6,36 @@ use App\DTOs\Appointment\StorAppointmentData;
 use App\Enums\Medical\AppointmentStatus;
 use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
-use App\Models\DoctorSchedule;
 use App\Services\AttachmentService;
+use App\Services\FinancialService;
+use App\Services\Medical\DoctorScheduleVersionService;
+use App\Services\VacationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class StoreAppointmentAction
 {
-    public function __construct(private readonly AttachmentService $attachmentService) {}
+    public function __construct(
+        private readonly AttachmentService $attachmentService,
+        private readonly FinancialService $financialService,
+        private readonly VacationService $vacationService,
+        private readonly DoctorScheduleVersionService $versionService,
+    ) {}
 
     public function execute(int $patientId, StorAppointmentData $dto)
     {
-
         return DB::transaction(function () use ($patientId, $dto) {
 
             $date = Carbon::parse($dto->date);
             $dayName = strtolower($date->englishDayOfWeek);
             $startTime = Carbon::parse($dto->time);
 
-            $schedule = DoctorSchedule::where('doctor_id', $dto->doctorId)
-                ->activeOnDay($dayName)
-                ->first();
+            if ($this->vacationService->isBlockingDate($dto->doctorId, $date)) {
+                throw new BusinessLogicException('Doctor is unavailable on the selected date.');
+            }
+
+            $versions = $this->versionService->versionsForDoctor($dto->doctorId);
+            $schedule = $this->versionService->resolveItemFromCollection($versions, $date);
 
             if (! $schedule) {
                 throw new BusinessLogicException('the selected doctor does not work in this day');
@@ -62,7 +71,13 @@ class StoreAppointmentAction
                 );
             }
 
-            return $appointment->load('attachments');
+            $invoice = $this->financialService->payForAppointmentAndCreateInvoice($appointment->loadMissing(['doctor.user', 'patient.user']));
+
+            return [
+                'appointment' => $appointment->load('attachments'),
+                'invoice' => $invoice,
+                'current_balance' => $appointment->patient->user->fresh()->wallet_balance,
+            ];
         });
     }
 }

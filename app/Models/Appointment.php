@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -49,14 +50,18 @@ class Appointment extends Model
 
     public function invoice(): HasOne
     {
-        return $this->hasOne(Invoice::class);
+        return $this->hasOne(Invoice::class)->latestOfMany();
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     public function scopeBlockingTimeOnDate(Builder $query, Carbon|string $date)
     {
         return $query->whereDate('appointment_date', $date)
             ->whereIn('status', [
-                AppointmentStatus::CONFIRMED,
                 AppointmentStatus::PENDING,
             ]);
     }
@@ -67,7 +72,6 @@ class Appointment extends Model
             ->whereTime('start_time', $time)
             ->whereIn('status', [
                 AppointmentStatus::PENDING,
-                AppointmentStatus::CONFIRMED,
             ]);
     }
 
@@ -100,9 +104,19 @@ class Appointment extends Model
 
     public function canBeCancelled(): bool
     {
-        $appointmentDateTime = Carbon::parse($this->appointment_date->format('Y-m-d').' '.$this->start_time);
+        return $this->canBeCancelledByPatient();
+    }
+
+    public function canBeCancelledByPatient(): bool
+    {
+        $appointmentDateTime = $this->appointmentDateTime();
 
         return ! $appointmentDateTime->subHours(2)->isPast();
+    }
+
+    public function appointmentDateTime(): Carbon
+    {
+        return Carbon::parse(Carbon::parse($this->appointment_date)->format('Y-m-d').' '.$this->start_time);
     }
 
     public function scopeForDoctorAgenda($query, int $doctorId, string $startDate, string $endDate)
@@ -110,10 +124,12 @@ class Appointment extends Model
         return $query->with(['patient.user'])
             ->where('doctor_id', $doctorId)
             ->whereBetween('appointment_date', [$startDate, $endDate])
-            ->where('status', [
+            ->whereIn('status', [
                 AppointmentStatus::PENDING->value,
                 AppointmentStatus::COMPLETED->value,
+                AppointmentStatus::NO_SHOW->value,
             ])
+            ->orderBy('appointment_date')
             ->orderBy('start_time');
     }
 
