@@ -12,10 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\HasMedia;
 
-class Patient extends Model
+class Patient extends Model implements HasMedia
 {
-    use Filterable, HasFactory, SoftDeletes;
+    use Filterable, HasFactory, SoftDeletes, InteractsWithMedia;
 
     protected $fillable = [
         'user_id',
@@ -29,6 +31,12 @@ class Patient extends Model
         'blood_type',
         'date_of_birth',
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('xray_images'); // multiple images (gallery)
+        $this->addMediaCollection('medical_test_images'); // multiple images (gallery)
+    }
 
     public function user(): BelongsTo
     {

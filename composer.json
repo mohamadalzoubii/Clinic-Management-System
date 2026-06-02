@@ -12,8 +12,10 @@
         "laravel/reverb": "^1.10",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "paragonie/sodium_compat": "*",
         "pusher/pusher-php-server": "^7.2",
         "simplesoftwareio/simple-qrcode": "^4.2",
+        "spatie/laravel-medialibrary": "^11.23",
         "spatie/laravel-permission": "^6.25"
     },
     "require-dev": {

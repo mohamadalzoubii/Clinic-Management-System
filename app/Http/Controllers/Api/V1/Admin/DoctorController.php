@@ -73,10 +73,16 @@ class DoctorController extends Controller
             'session_price' => ['required', 'numeric', 'min:0'],
             'license_number' => ['required', 'string', 'max:255', 'unique:doctors,license_number'],
             'gender' => ['required', 'string', 'max:50'],
+            'photo' => ['nullable', 'image', 'max:2048'], // Max 2MB Photo validation
         ]);
 
         $service = app('App\\Services\\DoctorService');
         $doctor = $service->store($data);
+
+        // Save photo if uploaded
+        if ($request->hasFile('photo')) {
+            $doctor->addMediaFromRequest('photo')->toMediaCollection('doctor_photo');
+        }
 
         return $this->success('Doctor created successfully.', [
             'doctor' => new DoctorResource($doctor->loadMissing('user')),
@@ -99,10 +105,16 @@ class DoctorController extends Controller
             'session_price' => ['sometimes', 'numeric', 'min:0'],
             'license_number' => ['sometimes', 'string', 'max:255', 'unique:doctors,license_number,'.$doctor->id],
             'gender' => ['sometimes', 'string', 'max:50'],
+            'photo' => ['nullable', 'image', 'max:2048'], // Max 2MB Photo validation
         ]);
 
         $service = app('App\\Services\\DoctorService');
         $doctor = $service->update($doctor, $data);
+
+        // Save photo if uploaded (Spatie singleFile() clears old automatically)
+        if ($request->hasFile('photo')) {
+            $doctor->addMediaFromRequest('photo')->toMediaCollection('doctor_photo');
+        }
 
         return $this->ok('Doctor updated successfully.', [
             'doctor' => new DoctorResource($doctor),

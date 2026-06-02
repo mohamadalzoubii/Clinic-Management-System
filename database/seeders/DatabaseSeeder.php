@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\Medical\AppointmentStatus;
 use App\Enums\Medical\VacationStatus;
+use App\Enums\Medical\DoctorSpecialization;
 use App\Enums\RoleEnum;
 use App\Models\Appointment;
 use App\Models\Consultation;
@@ -24,10 +25,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Collection;
 use Spatie\Permission\PermissionRegistrar;
 
-// تأكد من وجود المودل
-
-// تأكد من وجود المودل
-
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -41,18 +38,13 @@ class DatabaseSeeder extends Seeder
         $this->call([RoleSeeder::class]);
         $this->call([AdminAccountSeeder::class]);
         $this->call([SecretaryAccountSeeder::class]);
+        
         $doctorUser = User::factory()->create([
-
             'first_name' => 'doctor',
-
             'last_name' => 'Test',
-
             'email' => 'doctor@test.com',
-
             'password' => Hash::make('password'),
-
             'user_status' => 'approved',
-
         ]);
 
         $doctorUser->assignRole(RoleEnum::DOCTOR->value);
@@ -63,29 +55,18 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DoctorSchedule::factory()->create([
-
             'doctor_id' => $doctor->id,
-
             'day_of_week' => 'monday',
-
             'start_time' => '09:00',
-
             'end_time' => '12:00',
-
         ]);
 
         $patientUser = User::factory()->create([
-
             'first_name' => 'Patient',
-
             'last_name' => 'Test',
-
             'email' => 'patient@test.com',
-
             'password' => Hash::make('password'),
-
             'user_status' => 'approved',
-
         ]);
 
         $patientUser->assignRole(RoleEnum::PATIENT->value);
@@ -94,7 +75,6 @@ class DatabaseSeeder extends Seeder
 
         $faker = Factory::create();
 
-        // 🔥
         // 3. Create Packages
         $packages = [
             ['name' => 'Basic Wellness', 'price' => 0, 'balance_amount' => 60],
@@ -111,26 +91,56 @@ class DatabaseSeeder extends Seeder
             ->create([
                 'user_status' => 'approved',
                 'password' => Hash::make('password'),
-                'wallet_balance' => rand(50, 300), // إعطاء رصيد عشوائي للمرضى
-            ])
-            ;
+                'wallet_balance' => rand(50, 300),
+            ]);
 
         foreach ($patients as $user) {
             $user->assignRole(RoleEnum::PATIENT->value);
         }
 
-        // 5. Create 10 Doctors (With Schedules)
+        // 5. Create 10 General Doctors (With Schedules)
         $doctors = User::factory(10)
             ->has(Doctor::factory()->has(DoctorSchedule::factory()->count(4), 'schedules'), 'doctor')
             ->create([
                 'user_status' => 'approved',
                 'password' => Hash::make('password'),
-            ])
-            ;
+            ]);
 
         foreach ($doctors as $user) {
             $user->assignRole(RoleEnum::DOCTOR->value);
         }
+
+        // 5b. Create 1 Dedicated X-Ray Specialist (Radiologist)
+        $radiologistUser = User::factory()->create([
+            'first_name' => 'Radiologist',
+            'last_name' => 'Specialist',
+            'email' => 'radiologist@test.com',
+            'password' => Hash::make('password'),
+            'user_status' => 'approved',
+        ]);
+        $radiologistUser->assignRole(RoleEnum::DOCTOR->value);
+        $radiologist = Doctor::factory()->create([
+            'user_id' => $radiologistUser->id,
+            'specialization' => DoctorSpecialization::RADIOLOGIST->value,
+            'session_price' => 65.00,
+        ]);
+        DoctorSchedule::factory()->count(4)->create(['doctor_id' => $radiologist->id]);
+
+        // 5c. Create 1 Dedicated Medical Test Specialist (Pathologist)
+        $pathologistUser = User::factory()->create([
+            'first_name' => 'Pathologist',
+            'last_name' => 'Specialist',
+            'email' => 'pathologist@test.com',
+            'password' => Hash::make('password'),
+            'user_status' => 'approved',
+        ]);
+        $pathologistUser->assignRole(RoleEnum::DOCTOR->value);
+        $pathologist = Doctor::factory()->create([
+            'user_id' => $pathologistUser->id,
+            'specialization' => DoctorSpecialization::PATHOLOGIST->value,
+            'session_price' => 55.00,
+        ]);
+        DoctorSchedule::factory()->count(4)->create(['doctor_id' => $pathologist->id]);
 
         $vacationDoctors = $doctors->take(2);
 
@@ -150,12 +160,18 @@ class DatabaseSeeder extends Seeder
         foreach ($doctors as $doctorUser) {
             $this->seedVersionedAgendaForDoctor($doctorUser->doctor, $patients, $adminUserId);
         }
+        
+        // Seed versioned agendas for the diagnostic specialists
+        $this->seedVersionedAgendaForDoctor($radiologist, $patients, $adminUserId);
+        $this->seedVersionedAgendaForDoctor($pathologist, $patients, $adminUserId);
 
         // 6. Generate "The Living System" (Appointments, Consultations, Prescriptions, Invoices, Reviews)
         $appointmentStatuses = AppointmentStatus::cases();
 
-        // Loop through each doctor to give them an active history
-        foreach ($doctors as $docUser) {
+        // Merge standard doctors with newly created specialists so they all receive simulation history
+        $allDoctorUsers = $doctors->concat([$radiologistUser, $pathologistUser]);
+
+        foreach ($allDoctorUsers as $docUser) {
             $doctor = $docUser->doctor;
 
             // Create 5 to 15 appointments per doctor
@@ -165,7 +181,6 @@ class DatabaseSeeder extends Seeder
                 $randomPatient = $patients->random()->patient;
                 $status = $faker->randomElement($appointmentStatuses)->value;
 
-                // Mix of past and future dates
                 $isPast = in_array($status, [AppointmentStatus::COMPLETED->value, AppointmentStatus::CANCELLED->value]);
                 $date = $isPast ? Carbon::now()->subDays(rand(1, 30)) : Carbon::now()->addDays(rand(1, 14));
 
@@ -180,7 +195,7 @@ class DatabaseSeeder extends Seeder
                     'reason' => $faker->sentence(),
                 ]);
 
-                // B. If Completed -> Generate Consultation, Rx, Invoice, and Review
+                // B. If Completed -> Generate Consultation, Rx, and Invoice
                 if ($status === AppointmentStatus::COMPLETED->value) {
 
                     // 1. Consultation
@@ -188,12 +203,9 @@ class DatabaseSeeder extends Seeder
                         'appointment_id' => $appointment->id,
                         'doctor_id' => $doctor->id,
                         'patient_id' => $randomPatient->id,
-
-                        // الحقول الجديدة بدال الـ notes
                         'anamnesis' => 'Patient presented with '.$faker->word().' pain. Vitals are stable. Advised rest and hydration.',
-                        'symptoms' => [$faker->word(), $faker->word()], // مصفوفة كلمات عشوائية
+                        'symptoms' => [$faker->word(), $faker->word()],
                         'diagnosis' => 'General Fatigue',
-
                         'next_visit_date' => $date->copy()->addDays(7)->format('Y-m-d'),
                     ]);
 
@@ -234,29 +246,6 @@ class DatabaseSeeder extends Seeder
                         'status' => 'paid',
                         'paid_at' => $date->copy()->addHours(1),
                     ]);
-
-                    // 4. Review (Assuming you have a reviews table linked to doctor and patient)
-                    // Uncomment and adjust if you have a Review model
-
-                    //                    DoctorReview::firstOrCreate(
-                    //                        [
-                    //                            // 🔍 محددات البحث
-                    //                            'doctor_id' => $doctor->id,
-                    //                            'patient_id' => $randomPatient->id,
-                    //                        ],
-                    //                        [
-                    //                            // ✍️ البيانات الجديدة
-                    //                            //                            'appointment_id' => $appointment->id,
-                    //                            'rating' => rand(3, 5),
-                    //                            'comment' => $faker->randomElement([
-                    //                                'Great doctor, very attentive.',
-                    //                                'The clinic was clean and the staff was friendly.',
-                    //                                'Highly recommended!',
-                    //                                'Doctor took the time to explain everything clearly.',
-                    //                            ]),
-                    //                        ]
-                    //                    );
-
                 }
             }
         }

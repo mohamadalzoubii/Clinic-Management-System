@@ -9,10 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Doctor extends Model
+class Doctor extends Model implements HasMedia
 {
-    use Filterable, HasFactory, SoftDeletes;
+    use Filterable, HasFactory, SoftDeletes, InteractsWithMedia;
 
     public $fillable = [
         'user_id',
@@ -25,6 +28,19 @@ class Doctor extends Model
         'license_number',
         'gender',
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('doctor_photo')
+            ->singleFile();
+    }
+
+    public function getDoctorPhotoUrlAttribute(): ?string
+    {
+        $media = $this->getFirstMedia('doctor_photo');
+
+        return $media?->getUrl();
+    }
 
     public function user(): BelongsTo
     {

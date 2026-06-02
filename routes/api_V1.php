@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\DoctorAvailabilityController;
 use App\Http\Controllers\Api\V1\Doctor\VacationController as DoctorVacationController;
 use App\Http\Controllers\Api\V1\FinancialController;
 use App\Http\Controllers\Api\V1\PatientPackageController;
+use App\Http\Controllers\Api\V1\PatientMediaController;
 use App\Http\Controllers\Api\V1\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Api\V1\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AppointmentController;
@@ -44,7 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/CompleteProftile', 'completeProftile');
             Route::put('updateprofile/{patient}', 'updateProfile');
             Route::get('/appointments', 'appointments');
+        });
 
+        Route::prefix('patient/media')->group(function () {
+            Route::get('/xrays', [PatientMediaController::class, 'xrays']);
+            Route::get('/medical-tests', [PatientMediaController::class, 'medicalTests']);
         });
 
         Route::prefix('doctors')->controller(DoctorController::class)->group(function () {
@@ -56,11 +61,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('/{appointment}/update', 'cansal');
         });
     });
+    Route::get('/patients/{patient}/media/xrays', [PatientMediaController::class, 'getPatientXrays']);
+    Route::get('/patients/{patient}/media/medical-tests', [PatientMediaController::class, 'getPatientMedicalTests']);
 
     Route::middleware('role:admin|doctor|secretary')->group(function () {
 
         Route::get('/patients', [PatientController::class, 'index']);
         Route::get('/patients/{patient}', [PatientController::class, 'show']);
+        
+        // Added: Allow clinical staff to read specific patient visual history archives
 
         Route::get('/doctors/dashboard', [DoctorController::class, 'dashboard']);
         Route::get('/doctors/summary', [DoctorController::class, 'summary']);
@@ -78,7 +87,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::prefix('appointments')->controller(ConsultationController::class)->group(function () {
             Route::post('/{appointment}/consultations', 'storeConsultation');
-
         });
     });
 
@@ -86,6 +94,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(DoctorVacationController::class)->prefix('doctor/vacations')->group(function () {
             Route::get('/', 'index');
             Route::post('/', 'store');
+        });
+
+        Route::prefix('doctor/media')->group(function () {
+            Route::post('/xrays', [PatientMediaController::class, 'uploadXray']);
+            Route::post('/medical-tests', [PatientMediaController::class, 'uploadMedicalTests']);
         });
 
         Route::prefix('appointments')->controller(\App\Http\Controllers\AppointmentController::class)->group(function () {
@@ -179,7 +192,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('chat')->controller(ChatController::class)->group(function () {
         Route::post('/sendmessages', 'sendMessage');
         Route::get('/{receiverId}/getmessages', 'getMessages');
-
     });
 
     Route::prefix('ai-chat')->controller(AiChatController::class)->group(function () {
@@ -188,23 +200,16 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('invoices')->controller(FinancialController::class)->group(function () {
-
         Route::get('/', 'index');
         Route::post('/wallet/charge', 'purchasePackage');
-
         Route::get('/{invoice}/download', 'downloadInvoice');
-
     });
 
     Route::get('/doctors', [DoctorController::class, 'index']);
     Route::get('/doctors/{doctor}', [DoctorController::class, 'show']);
-
     Route::get('/doctors/{doctor}/available-days', [DoctorAvailabilityController::class, 'getAvailableDays']);
     Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);
-
     Route::get('/appointments', [AppointmentController::class, 'index']);
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show']);
-
     Route::post('/logout', [AuthController::class, 'logout']);
-
 });

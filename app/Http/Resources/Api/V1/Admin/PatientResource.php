@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class PatientResource extends JsonResource
 {
@@ -30,6 +31,8 @@ class PatientResource extends JsonResource
                     'is_smoker' => $this->is_smoker,
                     'drinks_alcohol' => $this->drinks_alcohol,
                 ],
+                'xrays' => $this->formatMediaCollection('xray_images'),
+                'medicalTests' => $this->formatMediaCollection('pathologist_images'),
                 'wallet_balance' => $this->whenLoaded('user') ? $this->user->wallet_balance : null,
                 'status' => $this->whenLoaded('user') ? $this->user->user_status : null,
                 'appointments_count' => $this->appointments_count ?? null,
@@ -40,5 +43,29 @@ class PatientResource extends JsonResource
                 'user' => $this->whenLoaded('user'),
             ],
         ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function formatMediaCollection(string $collectionName): array
+    {
+        if (!method_exists($this->resource, 'getMedia')) {
+            return [];
+        }
+
+        /** @var \Illuminate\Support\Collection<int, Media> $media */
+        $media = $this->resource->getMedia($collectionName);
+
+        return $media->map(function (Media $m) {
+            return [
+                'id' => (string) $m->id,
+                'url' => $m->getUrl(),
+                'name' => $m->name,
+                'file_name' => $m->file_name,
+                'mime_type' => $m->mime_type,
+                'created_at' => $m->created_at?->toISOString(),
+            ];
+        })->values()->toArray();
     }
 }

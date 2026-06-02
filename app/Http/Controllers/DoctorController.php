@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Medical\Review\StoreDoctorReviewAction;
 use App\Actions\Medical\Stats\GetDoctorDashboardStatsAction;
 use App\DTOs\Review\StoreDoctorReviewData;
+use App\Enums\Medical\DoctorSpecialization;
 use App\Http\Filters\V1\DoctorFilter;
 use App\Http\Requests\Doctor\StoreDoctorReviewRequest;
 use App\Http\Resources\AppointmentResource;
@@ -22,7 +23,16 @@ class DoctorController extends Controller
 
     public function index(DoctorFilter $filter)
     {
-        return DoctorResource::collection(Doctor::filter($filter)->with('user')->paginate(10));
+        // Exclude X-Ray (Radiologist) and Medical Test (Pathologist) specializations from the patient list view
+        $doctors = Doctor::filter($filter)
+            ->whereNotIn('specialization', [
+                DoctorSpecialization::RADIOLOGIST->value,
+                DoctorSpecialization::PATHOLOGIST->value,
+            ])
+            ->with('user')
+            ->paginate(10);
+
+        return DoctorResource::collection($doctors);
     }
 
     public function show(Doctor $doctor)
@@ -52,7 +62,6 @@ class DoctorController extends Controller
 
     public function dashboard(GetDoctorDashboardStatsAction $action)
     {
-
         $stats = $action->execute(auth()->user()->doctor->id);
 
         return response()->json([

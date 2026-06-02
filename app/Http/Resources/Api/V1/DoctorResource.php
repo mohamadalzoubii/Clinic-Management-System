@@ -24,6 +24,10 @@ class DoctorResource extends JsonResource
                 'license_number' => $this->license_number,
                 'bio' => $this->bio,
                 'session_price' => $this->session_price,
+
+                // Spatie Media Library: exposed by Doctor model as getDoctorPhotoUrlAttribute()
+                'photo_url' => $this->doctor_photo_url ?? null,
+
                 'on_leave' => app(VacationService::class)->isBlockingDate($this->id, Carbon::today()),
                 'created_at' => $this->created_at?->toISOString(),
                 'updated_at' => $this->updated_at?->toISOString(),
