@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\Api\V1\DoctorThreadResource;
 use App\Models\Doctor;
 use Illuminate\Support\Facades\DB;
+use App\Enums\Medical\DoctorSpecialization;
 
 class ChatController extends Controller
 {
@@ -41,7 +42,7 @@ class ChatController extends Controller
 
     }
     
-    public function getDoctorThreads(Request $request)
+   public function getDoctorThreads(Request $request)
     {
         $user = $request->user();
         
@@ -93,12 +94,17 @@ class ChatController extends Controller
             ->where('is_read', false)
             ->selectRaw('count(*)');
 
-        // Fetch all doctors with their subquery attributes injected
+        // Fetch filtered doctors with their subquery attributes injected
         $doctors = Doctor::with('user')
             ->select('doctors.*')
             ->selectSub($lastMessageBodySub, 'last_message')
             ->selectSub($lastMessageTimeSub, 'last_message_time')
             ->selectSub($unreadCountSub, 'unread_count')
+            // Exclude specified doctor specializations from the results
+            ->whereNotIn('specialization', [
+                DoctorSpecialization::RADIOLOGIST->value,
+                DoctorSpecialization::PATHOLOGIST->value,
+            ])
             ->get();
 
         return DoctorThreadResource::collection($doctors);
