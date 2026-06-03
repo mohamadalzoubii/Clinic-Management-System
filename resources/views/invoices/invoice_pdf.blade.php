@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Medical Invoice #{{ $invoice->invoice_number }}</title>
@@ -30,7 +31,7 @@
 
         /* Header Section */
         .header-title {
-            color: #2B6F71; /* 🔥 تم تغيير اللون هنا حسب طلبك */
+            color: #2B6F71;
             font-size: 28px;
             font-weight: bold;
             margin: 0 0 5px 0;
@@ -67,7 +68,7 @@
 
         .info-box {
             background-color: #f8f9fa;
-            border-left: 4px solid #2B6F71; /* 🔥 تم توحيد لون الخط الجانبي مع لون الشعار */
+            border-left: 4px solid #2B6F71;
             padding: 15px;
             border-radius: 4px;
         }
@@ -89,7 +90,7 @@
             color: #333;
         }
 
-        /* Data Tables (Billing & Medications) */
+        /* Data Tables (Billing & Summary) */
         .section-title {
             color: #2c3e50;
             font-size: 16px;
@@ -115,10 +116,6 @@
             padding: 10px;
             border-bottom: 1px solid #ecf0f1;
             color: #444;
-        }
-
-        .data-table tr:nth-child(even) {
-            background-color: #fcfcfc;
         }
 
         .text-right {
@@ -199,162 +196,142 @@
             font-weight: bold;
             font-size: 11px;
         }
+
+        .status-badge.refund {
+            background-color: #e67e22;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="invoice-container">
+    <div class="invoice-container">
 
-    <table class="no-border-table">
-        <tr>
-            <td style="width: 50%;">
-                <h2 class="header-title">Medics</h2>
-                <div class="clinic-info">
-                    123 Health Avenue, Medical District<br>
-                    Amman, Jordan 11118<br>
-                    Phone: +962 6 123 4567<br>
-                    Email: info@medics-center.com
-                </div>
-            </td>
-            <td style="width: 50%; text-align: right;" class="invoice-meta">
-                <h1>INVOICE</h1>
-                <table class="no-border-table meta-details text-right" style="width: 100%;">
-                    <tr>
-                        <td><strong>Invoice No:</strong></td>
-                        <td>{{ $invoice->invoice_number }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Date Issued:</strong></td>
-                        <td>{{ optional($invoice->created_at)->format('d M Y') }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Payment Status:</strong></td>
-                        <td>
-                            <span class="status-badge">
-                                {{ strtoupper($invoice->status?->value ?? 'PAID') }}
-                            </span>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-
-    <table class="no-border-table info-section">
-        <tr>
-            <td style="width: 48%; padding-right: 2%;">
-                <div class="info-box">
-                    <h3>BILL TO (PATIENT INFO)</h3>
-                    <p><strong>Name:</strong> {{ $invoice->user?->name ?? 'N/A' }}</p>
-                    <p><strong>Email:</strong> {{ $invoice->user?->email ?? 'N/A' }}</p>
-                    <p><strong>Phone:</strong> {{ $invoice->user?->phone ?? 'N/A' }}</p>
-                </div>
-            </td>
-
-            <td style="width: 48%; padding-left: 2%;">
-                <div class="info-box" style="border-left-color: #2ecc71;">
-                    <h3>ATTENDING PHYSICIAN</h3>
-                    <p><strong>Dr. Name:</strong> Dr. {{ $invoice->appointment?->doctor?->user?->name ?? 'Unknown' }}</p>
-                    <p>
-                        <strong>Specialty:</strong> {{ $invoice->appointment?->doctor?->specialization ?? 'General Practice' }}
-                    </p>
-                    <p><strong>Consultation Date:</strong>
-                        {{ $invoice->appointment?->appointment_date ? \Carbon\Carbon::parse($invoice->appointment->appointment_date)->format('d M Y - h:i A') : 'N/A' }}
-                    </p>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <div class="section-title">Consultation & Services</div>
-    <table class="data-table">
-        <thead>
-        <tr>
-            <th style="width: 5%;">#</th>
-            <th style="width: 55%;">Description</th>
-            <th class="text-center" style="width: 15%;">Qty</th>
-            <th class="text-right" style="width: 25%;">Amount (JOD)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>1</td>
-            <td>
-                <strong>Medical Consultation</strong><br>
-                <span style="font-size: 11px; color: #7f8c8d;">Standard checkup and diagnosis</span>
-            </td>
-            <td class="text-center">1</td>
-            <td class="text-right">{{ number_format($invoice->amount ?? 0, 2) }}</td>
-        </tr>
-        </tbody>
-    </table>
-
-    <div class="section-title">Prescribed Medications (Rx)</div>
-    <table class="data-table">
-        <thead>
-        <tr>
-            <th style="width: 30%;">Medication Name</th>
-            <th style="width: 25%;">Dosage</th>
-            <th style="width: 25%;">Frequency</th>
-            <th style="width: 20%;">Duration</th>
-        </tr>
-        </thead>
-        <tbody>
-        {{-- 🔥 طريقة احترافية للتحقق من وجود العلاقات بالكامل بدون إيرور --}}
-        @if($invoice->appointment?->consultation?->prescriptionItems?->count() > 0)
-
-            @foreach($invoice->appointment->consultation->prescriptionItems as $item)
-                <tr>
-                    <td><strong>{{ $item->medicine_name }}</strong></td>
-                    <td>{{ $item->dosage }}</td>
-                    <td>{{ $item->frequency }}</td>
-                    <td>{{ $item->duration }}</td>
-                </tr>
-            @endforeach
-
-        @else
+        <table class="no-border-table">
             <tr>
-                <td colspan="4" class="text-center" style="color: #95a5a6; padding: 20px;">
-                    No medications prescribed during this consultation.
+                <td style="width: 50%;">
+                    <h2 class="header-title">Medics</h2>
+                    <div class="clinic-info">
+                        123 Health Avenue, Medical District<br>
+                        Sahat al-Umawiyin, Damascus <br>
+                        Phone: +9639 6446 1555<br>
+                        Email: medics.sy@gmail.com
+                    </div>
+                </td>
+                <td style="width: 50%; text-align: right;" class="invoice-meta">
+                    <h1>INVOICE</h1>
+                    <table class="no-border-table meta-details text-right" style="width: 100%;">
+                        <tr>
+                            <td><strong>Invoice No:</strong></td>
+                            <td>{{ $invoice->invoice_number }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Date Issued:</strong></td>
+                            <td>{{ optional($invoice->created_at)->format('d M Y') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment Status:</strong></td>
+                            <td>
+                                <span
+                                    class="status-badge {{ strtolower($invoice->status?->value ?? '') === 'refunded' ? 'refund' : '' }}">
+                                    {{ strtoupper($invoice->status?->value ?? 'PAID') }}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
                 </td>
             </tr>
-        @endif
-        </tbody>
-    </table>
+        </table>
 
-    <div class="clearfix">
-        <table class="totals-table">
+        <table class="no-border-table info-section">
             <tr>
-                <td>Subtotal</td>
-                <td class="text-right">{{ number_format($invoice->amount ?? 0, 2) }} JOD</td>
-            </tr>
-            <tr>
-                <td>Tax (0%)</td>
-                <td class="text-right">0.00 JOD</td>
-            </tr>
-            <tr class="grand-total">
-                <td>Total Paid</td>
-                <td class="text-right">{{ number_format($invoice->amount ?? 0, 2) }} JOD</td>
+                <td
+                    style="width: {{ $invoice->entry_type !== 'wallet_recharge' ? '48%' : '100%' }}; padding-right: 2%;">
+                    <div class="info-box">
+                        <h3>BILL TO (PATIENT INFO)</h3>
+                        <p><strong>Name:</strong> {{ $invoice->user->first_name . ' ' . $invoice->user->last_name ?? 'N/A'}}</p>
+                        <p><strong>Email:</strong> {{ $invoice->user?->email ?? 'N/A' }}</p>
+                        <p><strong>Phone:</strong> {{ $invoice->user?->phone ?? 'N/A' }}</p>
+                    </div>
+                </td>
+
+                @if ($invoice->entry_type !== 'wallet_recharge')
+                    <td style="width: 48%; padding-left: 2%;">
+                        <div class="info-box" style="border-left-color: #2ecc71;">
+                            <h3>ATTENDING PHYSICIAN</h3>
+                            <p><strong>Dr. Name:</strong> Dr.
+                                {{ $invoice->appointment?->doctor?->user?->first_name. ' ' . $invoice->doctor?->user?->last_name  ?? 'Unknown' }}</p>
+                            <p>
+                                <strong>Specialty:</strong>
+                                {{ $invoice->appointment?->doctor?->specialization ?? 'General Practice' }}
+                            </p>
+                            <p><strong>Consultation Date:</strong>
+                                {{ $invoice->appointment?->appointment_date ? \Carbon\Carbon::parse($invoice->appointment->appointment_date)->format('d M Y') : 'N/A' }}
+                            </p>
+                        </div>
+                    </td>
+                @endif
             </tr>
         </table>
-    </div>
 
-    <div class="footer-section clearfix">
-        <div class="qr-wrapper">
-            <img src="data:image/svg+xml;base64,{{ $qrcode }}" alt="QR Code">
-            <div class="qr-text">Scan to Verify</div>
+        <div class="section-title">Transaction Details</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 75%;">Description</th>
+                    <th class="text-right" style="width: 25%;">Amount ($)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        @if (strtolower($invoice->status?->value ?? '') === 'refunded')
+                            <strong>Refund Back to Patient Wallet</strong><br>
+                            <span style="font-size: 11px; color: #7f8c8d;">Reversal entry for item transaction summary
+                                ({{ str_replace('_', ' ', $invoice->entry_type) }})</span>
+                        @elseif($invoice->entry_type === 'wallet_recharge')
+                            <strong>Wallet Recharge via Package</strong><br>
+                            <span style="font-size: 11px; color: #7f8c8d;">Credits successfully added into digital
+                                balance profile</span>
+                        @else
+                            <strong>Medical Consultation & Appointment Services</strong><br>
+                            <span style="font-size: 11px; color: #7f8c8d;">Standard healthcare platform checkup
+                                settlement validation</span>
+                        @endif
+                    </td>
+                    <td class="text-right">${{ number_format(abs($invoice->amount ?? 0), 2) }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="clearfix">
+            <table class="totals-table">
+                <tr class="grand-total">
+                    <td>{{ strtolower($invoice->status?->value ?? '') === 'refunded' ? 'Total Refunded' : 'Total Paid' }}
+                    </td>
+                    <td class="text-right">${{ number_format(abs($invoice->amount ?? 0), 2) }}</td>
+                </tr>
+            </table>
         </div>
 
-        <div class="terms">
-            <strong>Terms & Conditions:</strong><br>
-            1. This invoice is computer generated and does not require a physical signature.<br>
-            2. Prescribed medications should be taken strictly as directed by the physician.<br>
-            3. For any medical emergencies following the consultation, please visit the nearest ER.<br><br>
-            <em>Thank you for trusting Medics. Wishing you a speedy recovery!</em>
-        </div>
-    </div>
+        <div class="footer-section clearfix">
+            <div class="qr-wrapper">
+                <img src="data:image/svg+xml;base64,{{ $qrcode }}" alt="QR Code">
+                <div class="qr-text">Scan to Verify</div>
+            </div>
 
-</div>
+            <div class="terms">
+                <strong>Terms & Conditions:</strong><br>
+                1. This invoice is computer generated and does not require a physical signature.<br>
+                2. Transactions reflect adjustments processed through securely verified medical digital accounts.<br>
+                3. For any medical emergencies following your schedule, please visit the nearest emergency
+                facility.<br><br>
+                <em>Thank you for trusting Medics. Wishing you a continuous healthy lifecycle!</em>
+            </div>
+        </div>
+
+    </div>
 
 </body>
+
 </html>

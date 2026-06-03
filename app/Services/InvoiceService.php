@@ -10,12 +10,15 @@ class InvoiceService
 {
     public function generatePdf(Invoice $invoice)
     {
-
         $invoice->loadMissing(['user', 'appointment.doctor.user', 'appointment.consultation.prescriptionItems']);
 
+        $patientName = $invoice->user->first_name . ' ' . $invoice->user->last_name ?? 'N/A';
+        $displayAmount = number_format(abs($invoice->amount ?? 0), 2);
+        $typeIndicator = strtolower($invoice->status?->value ?? '') === 'refunded' ? 'Refunded Amount' : 'Amount';
+
         $qrData = "Invoice Number: {$invoice->invoice_number}\n"
-            ."Patient: {$invoice->user->name}\n"
-            ."Amount: {$invoice->amount}";
+            ."Patient: {$patientName}\n"
+            ."{$typeIndicator}: \${$displayAmount}";
 
         $qrcode = base64_encode(
             QrCode::format('svg')
