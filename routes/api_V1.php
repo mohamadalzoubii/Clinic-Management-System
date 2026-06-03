@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/CompleteProftile', 'completeProftile');
             Route::put('updateprofile/{patient}', 'updateProfile');
             Route::get('/appointments', 'appointments');
+            
         });
 
         Route::prefix('patient/media')->group(function () {
@@ -60,6 +61,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/storeAppointment', 'store');
             Route::patch('/{appointment}/update', 'cansal');
         });
+
+        Route::get('patient/chat/doctors-threads', [App\Http\Controllers\Api\V1\ChatController::class, 'getDoctorThreads']);
     });
     Route::get('/patients/{patient}/media/xrays', [PatientMediaController::class, 'getPatientXrays']);
     Route::get('/patients/{patient}/media/medical-tests', [PatientMediaController::class, 'getPatientMedicalTests']);
