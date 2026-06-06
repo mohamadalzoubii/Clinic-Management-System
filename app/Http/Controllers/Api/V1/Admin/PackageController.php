@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\DTOs\Package\StorePackageData;
+use App\DTOs\Package\UpdatePackageData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StorePackageRequest;
+use App\Http\Requests\Admin\UpdatePackageRequest;
 use App\Http\Resources\Api\V1\Admin\PackageResource;
 use App\Models\Package;
 use App\Services\Admin\PackageService;
 use App\Traits\ApiResponses;
-use Illuminate\Http\Request;
 
 class PackageController extends Controller
 {
     use ApiResponses;
+
+    public function __construct(private readonly PackageService $service) {}
 
     public function index()
     {
@@ -23,37 +28,27 @@ class PackageController extends Controller
         return new PackageResource($package);
     }
 
-    public function store(Request $request, PackageService $service)
+    public function store(StorePackageRequest $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'balance_amount' => ['required', 'numeric', 'min:0'],
-        ]);
-
-        $package = $service->store($data);
+        $package = $this->service->store(StorePackageData::formRequest($request));
 
         return $this->success('Package created successfully.', [
             'package' => new PackageResource($package),
         ], 201);
     }
 
-    public function update(Request $request, Package $package, PackageService $service)
+    public function update(UpdatePackageRequest $request, Package $package)
     {
-        $data = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'balance_amount' => ['sometimes', 'numeric', 'min:0'],
-        ]);
-
-        $package = $service->update($package, $data);
+        $package = $this->service->update($package, UpdatePackageData::formRequest($request));
 
         return $this->ok('Package updated successfully.', [
             'package' => new PackageResource($package),
         ]);
     }
 
-    public function destroy(Package $package, PackageService $service)
+    public function destroy(Package $package)
     {
-        $service->delete($package);
+        $this->service->delete($package);
 
         return $this->ok('Package deleted successfully.');
     }

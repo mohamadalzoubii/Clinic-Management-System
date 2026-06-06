@@ -3,18 +3,24 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Actions\Medical\Doctor\GetDoctorAgendaAction;
+use App\DTOs\Doctor\StoreDoctorData;
+use App\DTOs\Doctor\UpdateDoctorData;
 use App\Http\Controllers\Controller;
 use App\Http\Filters\V1\DoctorFilter;
-use App\Http\Resources\Api\V1\DoctorReviewResource;
+use App\Http\Requests\Doctor\StoreDoctorRequest;
+use App\Http\Requests\Doctor\UpdateDoctorRequest;
 use App\Http\Resources\Api\V1\Admin\DoctorResource;
+use App\Http\Resources\Api\V1\DoctorReviewResource;
 use App\Models\Doctor;
 use App\Models\DoctorReview;
+use App\Services\DoctorService;
 use App\Traits\ApiResponses;
-use Illuminate\Http\Request;
 
 class DoctorController extends Controller
 {
     use ApiResponses;
+
+    public function __construct(private readonly DoctorService $doctorService) {}
 
     public function index(DoctorFilter $filter)
     {
@@ -57,29 +63,12 @@ class DoctorController extends Controller
         return DoctorReviewResource::collection($reviews);
     }
 
-    public function store(Request $request)
+    public function store(StoreDoctorRequest $request)
     {
-        $data = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
-            'password' => ['required', 'string', 'min:8'],
-            'specialization' => ['required', 'string', 'max:255'],
-            'bio' => ['required', 'string'],
-            'education' => ['required', 'string', 'max:255'],
-            'certification' => ['required', 'string', 'max:255'],
-            'years_of_experience' => ['required', 'integer', 'min:0'],
-            'session_price' => ['required', 'numeric', 'min:0'],
-            'license_number' => ['required', 'string', 'max:255', 'unique:doctors,license_number'],
-            'gender' => ['required', 'string', 'max:50'],
-            'photo' => ['nullable', 'image', 'max:2048'], // Max 2MB Photo validation
-        ]);
+        $dto = StoreDoctorData::formRequest($request);
 
-        $service = app('App\\Services\\DoctorService');
-        $doctor = $service->store($data);
+        $doctor = $this->doctorService->store($dto);
 
-        // Save photo if uploaded
         if ($request->hasFile('photo')) {
             $doctor->addMediaFromRequest('photo')->toMediaCollection('doctor_photo');
         }
@@ -89,29 +78,12 @@ class DoctorController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, Doctor $doctor)
+    public function update(UpdateDoctorRequest $request, Doctor $doctor)
     {
-        $data = $request->validate([
-            'first_name' => ['sometimes', 'string', 'max:255'],
-            'last_name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,'.$doctor->user_id],
-            'phone' => ['nullable', 'sometimes', 'string', 'max:20', 'unique:users,phone,'.$doctor->user_id],
-            'password' => ['sometimes', 'string', 'min:8'],
-            'specialization' => ['sometimes', 'string', 'max:255'],
-            'bio' => ['sometimes', 'string'],
-            'education' => ['sometimes', 'string', 'max:255'],
-            'certification' => ['sometimes', 'string', 'max:255'],
-            'years_of_experience' => ['sometimes', 'integer', 'min:0'],
-            'session_price' => ['sometimes', 'numeric', 'min:0'],
-            'license_number' => ['sometimes', 'string', 'max:255', 'unique:doctors,license_number,'.$doctor->id],
-            'gender' => ['sometimes', 'string', 'max:50'],
-            'photo' => ['nullable', 'image', 'max:2048'], // Max 2MB Photo validation
-        ]);
+        $dto = UpdateDoctorData::formRequest($request);
 
-        $service = app('App\\Services\\DoctorService');
-        $doctor = $service->update($doctor, $data);
+        $doctor = $this->doctorService->update($doctor, $dto);
 
-        // Save photo if uploaded (Spatie singleFile() clears old automatically)
         if ($request->hasFile('photo')) {
             $doctor->addMediaFromRequest('photo')->toMediaCollection('doctor_photo');
         }
@@ -123,8 +95,7 @@ class DoctorController extends Controller
 
     public function destroy(Doctor $doctor)
     {
-        $service = app('App\\Services\\DoctorService');
-        $service->delete($doctor);
+        $this->doctorService->delete($doctor);
 
         return $this->ok('Doctor deleted successfully.');
     }

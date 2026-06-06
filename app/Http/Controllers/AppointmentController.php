@@ -56,7 +56,7 @@ class AppointmentController extends Controller
     {
         $patientId = $request->user()->patient->id;
 
-        $dto = StorAppointmentData::formRequset($request);
+        $dto = StorAppointmentData::formRequest($request);
 
         $result = $action->execute($patientId, $dto);
 

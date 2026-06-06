@@ -2,18 +2,33 @@
 
 namespace App\Services\Admin;
 
+use App\DTOs\Package\StorePackageData;
+use App\DTOs\Package\UpdatePackageData;
 use App\Models\Package;
 
 class PackageService
 {
-    public function store(array $data): Package
+    public function store(StorePackageData $dto): Package
     {
-        return Package::create(array_merge($data, ['price' => 0]));
+        return Package::create([
+            'name' => $dto->name,
+            'balance_amount' => $dto->balanceAmount,
+            'price' => 0,
+        ]);
     }
 
-    public function update(Package $package, array $data): Package
+    public function update(Package $package, UpdatePackageData $dto): Package
     {
-        $package->update(array_merge($data, ['price' => 0]));
+        if (! $dto->hasChanges()) {
+            return $package->fresh();
+        }
+
+        $payload = array_filter([
+            'name' => $dto->name,
+            'balance_amount' => $dto->balanceAmount,
+        ], static fn ($value) => $value !== null);
+
+        $package->update($payload);
 
         return $package->fresh();
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\InvoiceResource;
 use App\Models\Invoice;
 use App\Models\Package;
 use App\Services\FinancialService;
@@ -44,22 +45,12 @@ class FinancialController extends Controller
 
         $invoices = $request->user()
             ->invoices()
+            ->with('user.patient.user')
             ->latest('id')
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $items = collect($invoices->items())->map(fn (Invoice $invoice) => [
-                'id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
-                'amount' => $invoice->amount,
-                'status' => $invoice->status?->value ?? $invoice->status,
-                'entry_type' => $invoice->entry_type,
-                'paid_at' => $invoice->paid_at?->toISOString(),
-                'appointment_id' => $invoice->appointment_id,
-                'download_url' => url("/api/v1/invoices/{$invoice->id}/download"),
-            ]);
-
         return $this->ok('Invoices retrieved successfully.', [
-            'invoices' => $items,
+            'invoices' => InvoiceResource::collection($invoices->getCollection())->resolve(),
             'meta' => [
                 'current_page' => $invoices->currentPage(),
                 'last_page' => $invoices->lastPage(),
@@ -73,6 +64,5 @@ class FinancialController extends Controller
         $pdf = $this->invoiceService->generatePdf($invoice);
 
         return $pdf->download("invoice_{$invoice->invoice_number}.pdf");
-
     }
 }

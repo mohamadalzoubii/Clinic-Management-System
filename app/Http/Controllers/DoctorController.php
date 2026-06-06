@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Medical\Doctor\GetDoctorPatientAppointmentsAction;
+use App\Actions\Medical\Doctor\GetDoctorSummaryAction;
 use App\Actions\Medical\Review\StoreDoctorReviewAction;
 use App\Actions\Medical\Stats\GetDoctorDashboardStatsAction;
 use App\DTOs\Review\StoreDoctorReviewData;
 use App\Enums\Medical\DoctorSpecialization;
 use App\Http\Filters\V1\DoctorFilter;
 use App\Http\Requests\Doctor\StoreDoctorReviewRequest;
-use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\Api\V1\DoctorResource;
-use App\Models\Appointment;
+use App\Http\Resources\AppointmentResource;
+use App\Http\Resources\PatientResource;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Traits\ApiResponses;
@@ -23,7 +25,6 @@ class DoctorController extends Controller
 
     public function index(DoctorFilter $filter)
     {
-        // Exclude X-Ray (Radiologist) and Medical Test (Pathologist) specializations from the patient list view
         $doctors = Doctor::filter($filter)
             ->whereNotIn('specialization', [
                 DoctorSpecialization::RADIOLOGIST->value,
@@ -40,22 +41,20 @@ class DoctorController extends Controller
         return new DoctorResource($doctor->loadMissing('reviews', 'user'));
     }
 
-    public function storeReview(StoreDoctorReviewRequest $request, int $doctorId, StoreDoctorReviewAction $action)
-    {
-        $patient = $request->user()->patient->id;
-
+    public function storeReview(
+        StoreDoctorReviewRequest $request,
+        int $doctorId,
+        StoreDoctorReviewAction $action,
+    ) {
         $dto = StoreDoctorReviewData::formRequest($request);
 
-        $review = $action->execute($patient, $doctorId, $dto);
+        $review = $action->execute($doctorId, $dto, $request);
 
-        return response()->json([
-            'message' => 'Thank you! Your review has been submitted.',
-            'data' => [
-                'review' => [
-                    'id' => $review->id,
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
-                ],
+        return $this->success('Thank you! Your review has been submitted.', [
+            'review' => [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'comment' => $review->comment,
             ],
         ], 201);
     }
@@ -64,81 +63,52 @@ class DoctorController extends Controller
     {
         $stats = $action->execute(auth()->user()->doctor->id);
 
-        return response()->json([
+        return $this->ok('Dashboard stats retrieved successfully.', [
             'today_appointments' => $stats->todayAppointments,
             'pending_appointments' => $stats->pendingAppointments,
             'completed_today' => $stats->completedToday,
         ]);
     }
 
-    public function summary(Request $request)
+    public function summary(Request $request, GetDoctorSummaryAction $action)
     {
-        $doctorId = auth()->user()->doctor->id;
+        $doctor = auth()->user()->doctor;
+        if (!$doctor) {
+            return $this->error('Unauthorized. Doctor profile not found.', 403);
+        }
+
+        $doctorId = $doctor->id;
         $search = trim((string) $request->query('search', ''));
 
-        $appointments = Appointment::query()
-            ->where('doctor_id', $doctorId)
-            ->completed()
-            ->when($search !== '', function ($query) use ($search) {
-                $query->whereHas('patient.user', function ($patientQuery) use ($search) {
-                    $patientQuery->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
-                });
-            })
-            ->with(['patient.user', 'consultation.prescriptionItems'])
-            ->orderByDesc('appointment_date')
-            ->orderByDesc('start_time')
-            ->get();
+        $patients = $action->execute($doctorId, $search);
 
-        $patients = $appointments->groupBy('patient_id')->map(function ($patientAppointments) {
-            $latestAppointment = $patientAppointments->first();
-            $patient = $latestAppointment->patient->loadMissing('user');
-
-            return [
-                'patient_id' => $patient->id,
-                'patient_name' => trim(($patient->user->first_name ?? '').' '.($patient->user->last_name ?? '')),
-                'completed_appointments_count' => $patientAppointments->count(),
-                'last_completed_at' => $latestAppointment->created_at?->format('Y-m-d H:i:s'),
-                'patient' => new \App\Http\Resources\PatientResource($patient),
-            ];
-        })->values();
-
-        return response()->json([
+        return $this->ok('Doctor summary retrieved successfully.', [
             'type' => 'doctor_summary',
             'data' => [
                 'doctor_id' => $doctorId,
                 'patients' => $patients,
             ],
-            'message' => 'Doctor summary retrieved successfully.',
-            'status' => 200,
         ]);
     }
 
-    public function summaryPatientAppointments(Request $request, Patient $patient)
-    {
+    public function summaryPatientAppointments(
+        Request $request,
+        Patient $patient,
+        GetDoctorPatientAppointmentsAction $action,
+    ) {
         $doctorId = auth()->user()->doctor->id;
         $date = $request->query('date');
 
-        $appointments = Appointment::query()
-            ->where('doctor_id', $doctorId)
-            ->where('patient_id', $patient->id)
-            ->completed()
-            ->when($date, fn ($query) => $query->whereDate('appointment_date', $date))
-            ->with(['patient.user', 'consultation.prescriptionItems'])
-            ->orderByDesc('appointment_date')
-            ->orderByDesc('start_time')
-            ->get();
+        $appointments = $action->execute($doctorId, $patient, $date);
 
-        return response()->json([
+        return $this->ok('Patient appointments retrieved successfully.', [
             'type' => 'doctor_summary_patient_appointments',
             'data' => [
                 'doctor_id' => $doctorId,
                 'patient_id' => $patient->id,
-                'patient' => new \App\Http\Resources\PatientResource($patient->loadMissing('user')),
+                'patient' => new PatientResource($patient->loadMissing('user')),
                 'appointments' => AppointmentResource::collection($appointments),
             ],
-            'message' => 'Patient appointments retrieved successfully.',
-            'status' => 200,
         ]);
     }
 }

@@ -89,12 +89,12 @@ class Appointment extends Model
 
     public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', AppointmentStatus::PENDING->value);
     }
 
     public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', AppointmentStatus::COMPLETED->value);
     }
 
     public function isPending(): bool

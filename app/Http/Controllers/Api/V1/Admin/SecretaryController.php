@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\DTOs\Secretary\StoreSecretaryData;
+use App\DTOs\Secretary\UpdateSecretaryData;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\V1\SecretaryResource;
+use App\Http\Requests\Admin\StoreSecretaryRequest;
+use App\Http\Requests\Admin\UpdateSecretaryRequest;
+use App\Http\Resources\Api\V1\Admin\SecretaryResource;
 use App\Models\Secretary;
 use App\Services\Admin\SecretaryService;
 use App\Traits\ApiResponses;
@@ -13,9 +17,11 @@ class SecretaryController extends Controller
 {
     use ApiResponses;
 
-    public function index()
+    public function __construct(private readonly SecretaryService $service) {}
+
+    public function index(Request $request)
     {
-        $search = request()->query('search');
+        $search = $request->query('search');
 
         $query = Secretary::with('user')->latest();
 
@@ -37,47 +43,27 @@ class SecretaryController extends Controller
         return new SecretaryResource($secretary->loadMissing('user'));
     }
 
-    public function store(Request $request, SecretaryService $service)
+    public function store(StoreSecretaryRequest $request)
     {
-        $data = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
-            'password' => ['required', 'string', 'min:8'],
-            'work_days' => ['nullable', 'string', 'max:255'],
-            'monthly_salary' => ['nullable', 'numeric', 'min:0'],
-        ]);
-
-        $secretary = $service->store($data);
+        $secretary = $this->service->store(StoreSecretaryData::formRequest($request));
 
         return $this->success('Secretary created successfully.', [
             'secretary' => new SecretaryResource($secretary->loadMissing('user')),
         ], 201);
     }
 
-    public function update(Request $request, Secretary $secretary, SecretaryService $service)
+    public function update(UpdateSecretaryRequest $request, Secretary $secretary)
     {
-        $data = $request->validate([
-            'first_name' => ['sometimes', 'string', 'max:255'],
-            'last_name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,'.$secretary->user_id],
-            'phone' => ['nullable', 'sometimes', 'string', 'max:20', 'unique:users,phone,'.$secretary->user_id],
-            'password' => ['sometimes', 'string', 'min:8'],
-            'work_days' => ['nullable', 'sometimes', 'string', 'max:255'],
-            'monthly_salary' => ['nullable', 'sometimes', 'numeric', 'min:0'],
-        ]);
-
-        $secretary = $service->update($secretary, $data);
+        $secretary = $this->service->update($secretary, UpdateSecretaryData::formRequest($request));
 
         return $this->ok('Secretary updated successfully.', [
             'secretary' => new SecretaryResource($secretary),
         ]);
     }
 
-    public function destroy(Secretary $secretary, SecretaryService $service)
+    public function destroy(Secretary $secretary)
     {
-        $service->delete($secretary);
+        $this->service->delete($secretary);
 
         return $this->ok('Secretary deleted successfully.');
     }

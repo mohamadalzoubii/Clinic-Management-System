@@ -2,25 +2,31 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\DTOs\Patient\StorePatientData;
+use App\DTOs\Patient\UpdatePatientData;
 use App\Http\Controllers\Controller;
 use App\Http\Filters\V1\PatientFilter;
+use App\Http\Requests\Admin\StorePatientRequest;
+use App\Http\Requests\Admin\UpdatePatientRequest;
 use App\Http\Resources\Api\V1\Admin\PatientResource;
+use App\Http\Resources\Api\V1\InvoiceResource;
 use App\Models\Patient;
 use App\Services\Admin\PatientService;
 use App\Traits\ApiResponses;
-use App\Enums\Medical\AppointmentStatus;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
     use ApiResponses;
 
+    public function __construct(private readonly PatientService $service) {}
+
     public function index(PatientFilter $filter)
     {
         $patients = Patient::filter($filter)
             ->with('user')
             ->withCount(['appointments as appointments_count' => function ($query) {
-                $query->where('status', '!=', AppointmentStatus::CANCELLED->value);
+                $query->where('status', '!=', \App\Enums\Medical\AppointmentStatus::CANCELLED->value);
             }])
             ->orderByDesc('appointments_count')
             ->latest()
@@ -34,61 +40,27 @@ class PatientController extends Controller
         return new PatientResource($patient->loadMissing('user'));
     }
 
-    public function store(Request $request, PatientService $service)
+    public function store(StorePatientRequest $request)
     {
-        $data = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
-            'password' => ['required', 'string', 'min:8'],
-            'date_of_birth' => ['nullable', 'date'],
-            'emergency_contact_name' => ['nullable', 'string', 'max:255'],
-            'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
-            'allergies' => ['nullable', 'string'],
-            'chronic_diseases' => ['nullable', 'string'],
-            'weight' => ['nullable', 'numeric', 'min:0'],
-            'height' => ['nullable', 'numeric', 'min:0'],
-            'gender' => ['nullable', 'string', 'max:50'],
-            'blood_type' => ['nullable', 'string', 'max:50'],
-        ]);
-
-        $patient = $service->store($data);
+        $patient = $this->service->store(StorePatientData::formRequest($request));
 
         return $this->success('Patient created successfully.', [
             'patient' => new PatientResource($patient->loadMissing('user')),
         ], 201);
     }
 
-    public function update(Request $request, Patient $patient, PatientService $service)
+    public function update(UpdatePatientRequest $request, Patient $patient)
     {
-        $data = $request->validate([
-            'first_name' => ['sometimes', 'string', 'max:255'],
-            'last_name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,'.$patient->user_id],
-            'phone' => ['nullable', 'sometimes', 'string', 'max:20', 'unique:users,phone,'.$patient->user_id],
-            'password' => ['sometimes', 'string', 'min:8'],
-            'date_of_birth' => ['nullable', 'sometimes', 'date'],
-            'emergency_contact_name' => ['nullable', 'sometimes', 'string', 'max:255'],
-            'emergency_contact_phone' => ['nullable', 'sometimes', 'string', 'max:20'],
-            'allergies' => ['nullable', 'sometimes', 'string'],
-            'chronic_diseases' => ['nullable', 'sometimes', 'string'],
-            'weight' => ['nullable', 'sometimes', 'numeric', 'min:0'],
-            'height' => ['nullable', 'sometimes', 'numeric', 'min:0'],
-            'gender' => ['nullable', 'sometimes', 'string', 'max:50'],
-            'blood_type' => ['nullable', 'sometimes', 'string', 'max:50'],
-        ]);
-
-        $patient = $service->update($patient, $data);
+        $patient = $this->service->update($patient, UpdatePatientData::formRequest($request));
 
         return $this->ok('Patient updated successfully.', [
             'patient' => new PatientResource($patient),
         ]);
     }
 
-    public function destroy(Patient $patient, PatientService $service)
+    public function destroy(Patient $patient)
     {
-        $service->delete($patient);
+        $this->service->delete($patient);
 
         return $this->ok('Patient deleted successfully.');
     }
@@ -100,31 +72,12 @@ class PatientController extends Controller
 
         $invoices = $patient->user
             ->invoices()
+            ->with('user.patient.user')
             ->latest('id')
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $items = collect($invoices->items())->map(function ($invoice) {
-            $patientUser = $invoice->user?->patient?->user;
-
-            return [
-                'id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
-                'amount' => $invoice->amount,
-                'status' => $invoice->status?->value ?? $invoice->status,
-                'entry_type' => $invoice->entry_type,
-                'paid_at' => $invoice->paid_at?->toISOString(),
-                'download_url' => url("/api/v1/invoices/{$invoice->id}/download"),
-                'patient' => [
-                    'id' => $invoice->user?->patient?->id,
-                    'first_name' => $patientUser?->first_name,
-                    'last_name' => $patientUser?->last_name,
-                    'email' => $patientUser?->email,
-                ],
-            ];
-        });
-
         return $this->ok('Invoices retrieved successfully.', [
-            'invoices' => $items,
+            'invoices' => InvoiceResource::collection($invoices->getCollection())->resolve(),
             'meta' => [
                 'current_page' => $invoices->currentPage(),
                 'last_page' => $invoices->lastPage(),

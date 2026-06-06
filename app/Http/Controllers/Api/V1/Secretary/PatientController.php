@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api\V1\Secretary;
 
 use App\Enums\Medical\AppointmentStatus;
+use App\Http\Controllers\Controller;
 use App\Http\Filters\V1\AppointmentFilter;
 use App\Http\Filters\V1\PatientFilter;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\AppointmentResource;
+use App\Http\Requests\Admin\StorePatientRequest;
 use App\Http\Resources\Api\V1\Admin\PatientResource;
-use App\Models\Invoice;
+use App\Http\Resources\Api\V1\InvoiceResource;
+use App\Http\Resources\AppointmentResource;
+use App\DTOs\Patient\StorePatientData;
 use App\Models\Appointment;
 use App\Models\Package;
 use App\Models\Patient;
@@ -19,6 +21,8 @@ use Illuminate\Http\Request;
 class PatientController extends Controller
 {
     use ApiResponses;
+
+    public function __construct(private readonly PatientService $service) {}
 
     public function index(PatientFilter $filter)
     {
@@ -61,31 +65,12 @@ class PatientController extends Controller
 
         $invoices = $patient->user
             ->invoices()
+            ->with('user.patient.user')
             ->latest('id')
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $items = collect($invoices->items())->map(function (Invoice $invoice) {
-            $patientUser = $invoice->user?->patient?->user;
-
-            return [
-                'id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
-                'amount' => $invoice->amount,
-                'status' => $invoice->status?->value ?? $invoice->status,
-                'entry_type' => $invoice->entry_type,
-                'paid_at' => $invoice->paid_at?->toISOString(),
-                'download_url' => url("/api/v1/invoices/{$invoice->id}/download"),
-                'patient' => [
-                    'id' => $invoice->user?->patient?->id,
-                    'first_name' => $patientUser?->first_name,
-                    'last_name' => $patientUser?->last_name,
-                    'email' => $patientUser?->email,
-                ],
-            ];
-        });
-
         return $this->ok('Invoices retrieved successfully.', [
-            'invoices' => $items,
+            'invoices' => InvoiceResource::collection($invoices->getCollection())->resolve(),
             'meta' => [
                 'current_page' => $invoices->currentPage(),
                 'last_page' => $invoices->lastPage(),
@@ -94,40 +79,23 @@ class PatientController extends Controller
         ]);
     }
 
-    public function store(Request $request, PatientService $service)
+    public function store(StorePatientRequest $request)
     {
-        $data = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
-            'password' => ['required', 'string', 'min:8'],
-            'date_of_birth' => ['nullable', 'date'],
-            'emergency_contact_name' => ['nullable', 'string', 'max:255'],
-            'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
-            'allergies' => ['nullable', 'string'],
-            'chronic_diseases' => ['nullable', 'string'],
-            'weight' => ['nullable', 'numeric', 'min:0'],
-            'height' => ['nullable', 'numeric', 'min:0'],
-            'gender' => ['nullable', 'string', 'max:50'],
-            'blood_type' => ['nullable', 'string', 'max:50'],
-        ]);
-
-        $patient = $service->store($data);
+        $patient = $this->service->store(StorePatientData::formRequest($request));
 
         return $this->success('Patient account created successfully.', [
             'patient' => new PatientResource($patient->loadMissing('user')),
         ], 201);
     }
 
-    public function buyPackage(Request $request, Patient $patient, PatientService $service)
+    public function buyPackage(Request $request, Patient $patient)
     {
         $data = $request->validate([
             'package_id' => ['required', 'exists:packages,id'],
         ]);
 
         $package = Package::findOrFail($data['package_id']);
-        $result = $service->buyPackageForPatient($patient->user, $package);
+        $result = $this->service->buyPackageForPatient($patient->user, $package);
 
         return $this->ok('Package purchased successfully.', [
             'patient' => new PatientResource($patient->loadMissing('user')),

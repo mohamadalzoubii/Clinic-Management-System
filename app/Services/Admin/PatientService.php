@@ -2,6 +2,8 @@
 
 namespace App\Services\Admin;
 
+use App\DTOs\Patient\StorePatientData;
+use App\DTOs\Patient\UpdatePatientData;
 use App\Enums\RoleEnum;
 use App\Enums\UserStatus;
 use App\Models\Package;
@@ -15,56 +17,64 @@ class PatientService
 {
     public function __construct(private readonly FinancialService $financialService) {}
 
-    public function store(array $data): Patient
+    public function store(StorePatientData $dto): Patient
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($dto) {
             $user = User::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'] ?? null,
-                'password' => Hash::make($data['password']),
+                'first_name' => $dto->firstName,
+                'last_name' => $dto->lastName,
+                'email' => $dto->email,
+                'phone' => $dto->phone,
+                'password' => Hash::make($dto->password),
                 'user_status' => UserStatus::APPROVED->value,
             ]);
 
             $user->assignRole(RoleEnum::PATIENT->value);
 
             return $user->patient()->create([
-                'date_of_birth' => $data['date_of_birth'] ?? null,
-                'emergency_contact_name' => $data['emergency_contact_name'] ?? null,
-                'emergency_contact_phone' => $data['emergency_contact_phone'] ?? null,
-                'allergies' => $data['allergies'] ?? null,
-                'chronic_diseases' => $data['chronic_diseases'] ?? null,
-                'weight' => $data['weight'] ?? null,
-                'height' => $data['height'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'blood_type' => $data['blood_type'] ?? null,
+                'date_of_birth' => $dto->dateOfBirth,
+                'emergency_contact_name' => $dto->emergencyContactName,
+                'emergency_contact_phone' => $dto->emergencyContactPhone,
+                'allergies' => $dto->allergies,
+                'chronic_diseases' => $dto->chronicDiseases,
+                'weight' => $dto->weight,
+                'height' => $dto->height,
+                'gender' => $dto->gender?->value,
+                'blood_type' => $dto->bloodType?->value,
             ]);
         });
     }
 
-    public function update(Patient $patient, array $data): Patient
+    public function update(Patient $patient, UpdatePatientData $dto): Patient
     {
-        return DB::transaction(function () use ($patient, $data) {
-            $patient->user->update(array_filter([
-                'first_name' => $data['first_name'] ?? null,
-                'last_name' => $data['last_name'] ?? null,
-                'email' => $data['email'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'password' => isset($data['password']) ? Hash::make($data['password']) : null,
-            ], static fn ($value) => $value !== null));
+        return DB::transaction(function () use ($patient, $dto) {
+            if ($dto->hasUserChanges()) {
+                $userPayload = array_filter([
+                    'first_name' => $dto->firstName,
+                    'last_name' => $dto->lastName,
+                    'email' => $dto->email,
+                    'phone' => $dto->phone,
+                    'password' => $dto->password !== null ? Hash::make($dto->password) : null,
+                ], static fn ($value) => $value !== null);
 
-            $patient->update(array_filter([
-                'date_of_birth' => $data['date_of_birth'] ?? null,
-                'emergency_contact_name' => $data['emergency_contact_name'] ?? null,
-                'emergency_contact_phone' => $data['emergency_contact_phone'] ?? null,
-                'allergies' => $data['allergies'] ?? null,
-                'chronic_diseases' => $data['chronic_diseases'] ?? null,
-                'weight' => $data['weight'] ?? null,
-                'height' => $data['height'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'blood_type' => $data['blood_type'] ?? null,
-            ], static fn ($value) => $value !== null));
+                $patient->user->update($userPayload);
+            }
+
+            if ($dto->hasPatientChanges()) {
+                $patientPayload = array_filter([
+                    'date_of_birth' => $dto->dateOfBirth,
+                    'emergency_contact_name' => $dto->emergencyContactName,
+                    'emergency_contact_phone' => $dto->emergencyContactPhone,
+                    'allergies' => $dto->allergies,
+                    'chronic_diseases' => $dto->chronicDiseases,
+                    'weight' => $dto->weight,
+                    'height' => $dto->height,
+                    'gender' => $dto->gender?->value,
+                    'blood_type' => $dto->bloodType?->value,
+                ], static fn ($value) => $value !== null);
+
+                $patient->update($patientPayload);
+            }
 
             return $patient->fresh()->load('user');
         });

@@ -4,20 +4,17 @@ namespace App\DTOs\Appointment;
 
 use Illuminate\Http\Request;
 
-class StorAppointmentData
+readonly class StorAppointmentData
 {
-    /**
-     * Create a new class instance.
-     */
     public function __construct(
-        public readonly int $doctorId,
-        public readonly string $date,
-        public readonly string $time,
-        public readonly ?string $reason,
-        public readonly ?array $files,
+        public int $doctorId,
+        public string $date,
+        public string $time,
+        public ?string $reason,
+        public ?array $files,
     ) {}
 
-    public static function formRequset(Request $request): self
+    public static function formRequest(Request $request): self
     {
         $allFiles = $request->allFiles();
         $uploadedFiles = $allFiles['files'] ?? $allFiles['files_'] ?? null;
@@ -28,7 +25,6 @@ class StorAppointmentData
             time: $request->validated('time'),
             reason: $request->validated('reason'),
             files: $uploadedFiles,
-
         );
     }
 }

@@ -1,26 +1,23 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\V1\Admin\InvoiceController;
+use App\Http\Controllers\Api\V1\Admin\PackageController;
+use App\Http\Controllers\Api\V1\Admin\ScheduleController;
+use App\Http\Controllers\Api\V1\Admin\SecretaryController;
+use App\Http\Controllers\Api\V1\Admin\VacationController as AdminVacationController;
 use App\Http\Controllers\Api\V1\AiChatController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ChatController;
 use App\Http\Controllers\Api\V1\ConsultationController;
-use App\Http\Controllers\Api\V1\DoctorAvailabilityController;
 use App\Http\Controllers\Api\V1\Doctor\VacationController as DoctorVacationController;
+use App\Http\Controllers\Api\V1\DoctorAvailabilityController;
 use App\Http\Controllers\Api\V1\FinancialController;
-use App\Http\Controllers\Api\V1\PatientPackageController;
 use App\Http\Controllers\Api\V1\PatientMediaController;
-use App\Http\Controllers\Api\V1\Admin\AppointmentController as AdminAppointmentController;
-use App\Http\Controllers\Api\V1\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\V1\PatientPackageController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\PatientController;
-use App\Http\Controllers\Api\V1\Admin\DoctorController as AdminDoctorController;
-use App\Http\Controllers\Api\V1\Admin\PackageController as AdminPackageController;
-use App\Http\Controllers\Api\V1\Admin\VacationController as AdminVacationController;
-use App\Http\Controllers\Api\V1\Admin\ScheduleController as AdminScheduleController;
-use App\Http\Controllers\Api\V1\Admin\PatientController as AdminPatientController;
-use App\Http\Controllers\Api\V1\Admin\SecretaryController as AdminSecretaryController;
-use App\Http\Controllers\Api\V1\Secretary\PatientController as SecretaryPatientController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,7 +28,8 @@ Route::post('/admin/login', [AuthController::class, 'AdminLogin']);
 Route::post('/secretary/login', [AuthController::class, 'SecretaryLogin']);
 
 Route::middleware(['auth:sanctum', 'role:admin|secretary|patient'])->group(function () {
-    Route::controller(\App\Http\Controllers\Api\V1\Admin\PackageController::class)->prefix('packages')->group(function () {
+    Route::controller(PackageController::class)->prefix('packages')->group(function (
+    ) {
         Route::get('/', 'index');
         Route::get('/{package}', 'show');
     });
@@ -45,7 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/CompleteProftile', 'completeProftile');
             Route::put('updateprofile/{patient}', 'updateProfile');
             Route::get('/appointments', 'appointments');
-            
+
         });
 
         Route::prefix('patient/media')->group(function () {
@@ -62,7 +60,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('/{appointment}/update', 'cansal');
         });
 
-        Route::get('patient/chat/doctors-threads', [App\Http\Controllers\Api\V1\ChatController::class, 'getDoctorThreads']);
+        Route::get('patient/chat/doctors-threads',
+            [ChatController::class, 'getDoctorThreads']);
     });
     Route::get('/patients/{patient}/media/xrays', [PatientMediaController::class, 'getPatientXrays']);
     Route::get('/patients/{patient}/media/medical-tests', [PatientMediaController::class, 'getPatientMedicalTests']);
@@ -71,12 +70,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/patients', [PatientController::class, 'index']);
         Route::get('/patients/{patient}', [PatientController::class, 'show']);
-        
+
         // Added: Allow clinical staff to read specific patient visual history archives
 
         Route::get('/doctors/dashboard', [DoctorController::class, 'dashboard']);
         Route::get('/doctors/summary', [DoctorController::class, 'summary']);
-        Route::get('/doctors/summary/patients/{patient}/appointments', [DoctorController::class, 'summaryPatientAppointments']);
+        Route::get('/doctors/summary/patients/{patient}/appointments',
+            [DoctorController::class, 'summaryPatientAppointments']);
 
         Route::get('/available-days',
             [DoctorAvailabilityController::class, 'getAvailableDays']);
@@ -104,7 +104,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/medical-tests', [PatientMediaController::class, 'uploadMedicalTests']);
         });
 
-        Route::prefix('appointments')->controller(\App\Http\Controllers\AppointmentController::class)->group(function () {
+        Route::prefix('appointments')->controller(AppointmentController::class)->group(function (
+        ) {
             Route::patch('/{appointment}/no-show', 'markNoShow');
             Route::patch('/{appointment}/cancel', 'cancelAsDoctor');
         });
@@ -113,7 +114,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/overview', [AdminDashboardController::class, 'index']);
 
-        Route::controller(\App\Http\Controllers\Api\V1\Admin\DoctorController::class)->prefix('doctors')->group(function () {
+        Route::controller(App\Http\Controllers\Api\V1\Admin\DoctorController::class)->prefix('doctors')->group(function (
+        ) {
             Route::get('/', 'index');
             Route::post('/', 'store');
             Route::get('/{doctor}', 'show');
@@ -123,7 +125,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/{doctor}', 'destroy');
         });
 
-        Route::controller(\App\Http\Controllers\Api\V1\Admin\PatientController::class)->prefix('patients')->group(function () {
+        Route::controller(App\Http\Controllers\Api\V1\Admin\PatientController::class)->prefix('patients')->group(function (
+        ) {
             Route::get('/', 'index');
             Route::post('/', 'store');
             Route::get('/{patient}', 'show');
@@ -132,11 +135,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/{patient}', 'destroy');
         });
 
-        Route::get('/invoices', [\App\Http\Controllers\Api\V1\Admin\InvoiceController::class, 'index']);
+        Route::get('/invoices', [InvoiceController::class, 'index']);
 
-        Route::post('/patients/{patient}/buy-package', [\App\Http\Controllers\Api\V1\PatientPackageController::class, 'buyPackageForPatient']);
+        Route::post('/patients/{patient}/buy-package',
+            [PatientPackageController::class, 'buyPackageForPatient']);
 
-        Route::controller(\App\Http\Controllers\Api\V1\Admin\PackageController::class)->prefix('packages')->group(function () {
+        Route::controller(PackageController::class)->prefix('packages')->group(function (
+        ) {
             Route::get('/', 'index');
             Route::post('/', 'store');
             Route::get('/{package}', 'show');
@@ -144,16 +149,18 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/{package}', 'destroy');
         });
 
-        Route::controller(\App\Http\Controllers\Api\V1\Admin\AppointmentController::class)->prefix('appointments')->group(function () {
+        Route::controller(App\Http\Controllers\Api\V1\Admin\AppointmentController::class)->prefix('appointments')->group(function (
+        ) {
             Route::get('/', 'index');
             Route::delete('/{appointment}', 'destroy');
         });
 
-        Route::controller(\App\Http\Controllers\Api\V1\Admin\ScheduleController::class)->prefix('schedules')->group(function () {
+        Route::controller(ScheduleController::class)->prefix('schedules')->group(function (
+        ) {
             Route::get('/', 'index');
         });
 
-        Route::controller(\App\Http\Controllers\Api\V1\Admin\ScheduleController::class)
+        Route::controller(ScheduleController::class)
             ->prefix('doctors/{doctor}/schedules')
             ->group(function () {
                 Route::get('/', 'show');
@@ -168,7 +175,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('/{vacation}/drop', 'drop');
         });
 
-        Route::controller(\App\Http\Controllers\Api\V1\Admin\SecretaryController::class)->prefix('secretaries')->group(function () {
+        Route::controller(SecretaryController::class)->prefix('secretaries')->group(function (
+        ) {
             Route::get('/', 'index');
             Route::post('/', 'store');
             Route::get('/{secretary}', 'show');
@@ -180,7 +188,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:secretary')->prefix('secretary')->group(function () {
         Route::post('/patients/login-as-patient', [AuthController::class, 'LoginAsPatientForSecretary']);
 
-        Route::controller(\App\Http\Controllers\Api\V1\Secretary\PatientController::class)->prefix('patients')->group(function () {
+        Route::controller(App\Http\Controllers\Api\V1\Secretary\PatientController::class)->prefix('patients')->group(function (
+        ) {
             Route::get('/', 'index');
             Route::get('/{patient}', 'show');
             Route::get('/{patient}/appointments', 'appointments');
@@ -189,7 +198,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/{patient}/buy-package', 'buyPackage');
         });
 
-        Route::get('/appointments/today', [\App\Http\Controllers\Api\V1\Secretary\AppointmentController::class, 'today']);
+        Route::get('/appointments/today',
+            [App\Http\Controllers\Api\V1\Secretary\AppointmentController::class, 'today']);
     });
 
     Route::prefix('chat')->controller(ChatController::class)->group(function () {

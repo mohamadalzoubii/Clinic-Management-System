@@ -2,6 +2,8 @@
 
 namespace App\Services\Admin;
 
+use App\DTOs\Secretary\StoreSecretaryData;
+use App\DTOs\Secretary\UpdateSecretaryData;
 use App\Enums\RoleEnum;
 use App\Enums\UserStatus;
 use App\Models\Secretary;
@@ -11,42 +13,50 @@ use Illuminate\Support\Facades\Hash;
 
 class SecretaryService
 {
-    public function store(array $data): Secretary
+    public function store(StoreSecretaryData $dto): Secretary
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($dto) {
             $user = User::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'] ?? null,
-                'password' => Hash::make($data['password']),
+                'first_name' => $dto->firstName,
+                'last_name' => $dto->lastName,
+                'email' => $dto->email,
+                'phone' => $dto->phone,
+                'password' => Hash::make($dto->password),
                 'user_status' => UserStatus::APPROVED->value,
             ]);
 
             $user->assignRole(RoleEnum::SECRETARY->value);
 
             return $user->secretary()->create([
-                'work_days' => $data['work_days'] ?? null,
-                'monthly_salary' => $data['monthly_salary'] ?? null,
+                'work_days' => $dto->workDays,
+                'monthly_salary' => $dto->monthlySalary,
             ]);
         });
     }
 
-    public function update(Secretary $secretary, array $data): Secretary
+    public function update(Secretary $secretary, UpdateSecretaryData $dto): Secretary
     {
-        return DB::transaction(function () use ($secretary, $data) {
-            $secretary->user->update(array_filter([
-                'first_name' => $data['first_name'] ?? null,
-                'last_name' => $data['last_name'] ?? null,
-                'email' => $data['email'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'password' => isset($data['password']) ? Hash::make($data['password']) : null,
-            ], static fn ($value) => $value !== null));
+        return DB::transaction(function () use ($secretary, $dto) {
+            if ($dto->hasUserChanges()) {
+                $userPayload = array_filter([
+                    'first_name' => $dto->firstName,
+                    'last_name' => $dto->lastName,
+                    'email' => $dto->email,
+                    'phone' => $dto->phone,
+                    'password' => $dto->password !== null ? Hash::make($dto->password) : null,
+                ], static fn ($value) => $value !== null);
 
-            $secretary->update(array_filter([
-                'work_days' => $data['work_days'] ?? null,
-                'monthly_salary' => $data['monthly_salary'] ?? null,
-            ], static fn ($value) => $value !== null));
+                $secretary->user->update($userPayload);
+            }
+
+            if ($dto->hasSecretaryChanges()) {
+                $secretaryPayload = array_filter([
+                    'work_days' => $dto->workDays,
+                    'monthly_salary' => $dto->monthlySalary,
+                ], static fn ($value) => $value !== null);
+
+                $secretary->update($secretaryPayload);
+            }
 
             return $secretary->fresh()->load('user');
         });

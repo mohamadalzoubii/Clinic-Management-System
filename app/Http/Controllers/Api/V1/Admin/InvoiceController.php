@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\InvoiceResource;
 use App\Models\Invoice;
 use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class InvoiceController extends Controller
         $page = max(1, $request->integer('page', 1));
         $perPage = max(1, $request->integer('limit', 10));
 
-        $query = Invoice::query()->with(['user.patient']);
+        $query = Invoice::query()->with(['user.patient.user']);
 
         if ($patientId = $request->integer('patient_id')) {
             $query->whereHas('user.patient', function ($q) use ($patientId) {
@@ -25,7 +26,7 @@ class InvoiceController extends Controller
         }
 
         if ($search = $request->string('search')) {
-            $like = '%' . trim($search) . '%';
+            $like = '%'.trim($search).'%';
             $query->where(function ($q) use ($like) {
                 $q->whereHas('user', function ($q2) use ($like) {
                     $q2->where('email', 'like', $like);
@@ -37,28 +38,8 @@ class InvoiceController extends Controller
 
         $invoices = $query->latest('id')->paginate($perPage, ['*'], 'page', $page);
 
-        $items = collect($invoices->items())->map(function (Invoice $invoice) {
-            $patientUser = $invoice->user?->patient?->user;
-
-            return [
-                'id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
-                'amount' => $invoice->amount,
-                'status' => $invoice->status?->value ?? $invoice->status,
-                'entry_type' => $invoice->entry_type,
-                'paid_at' => $invoice->paid_at?->toISOString(),
-                'download_url' => url("/api/v1/invoices/{$invoice->id}/download"),
-                'patient' => [
-                    'id' => $invoice->user?->patient?->id,
-                    'first_name' => $patientUser?->first_name,
-                    'last_name' => $patientUser?->last_name,
-                    'email' => $patientUser?->email,
-                ],
-            ];
-        });
-
         return $this->ok('Invoices retrieved successfully.', [
-            'invoices' => $items,
+            'invoices' => InvoiceResource::collection($invoices->getCollection())->resolve(),
             'meta' => [
                 'current_page' => $invoices->currentPage(),
                 'last_page' => $invoices->lastPage(),

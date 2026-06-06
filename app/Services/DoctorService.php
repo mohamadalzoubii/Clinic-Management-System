@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Actions\Appointment\CancelAppointmentAction;
+use App\DTOs\Doctor\StoreDoctorData;
+use App\DTOs\Doctor\UpdateDoctorData;
 use App\Enums\RoleEnum;
 use App\Enums\UserStatus;
 use App\Models\Doctor;
@@ -14,54 +16,62 @@ class DoctorService
 {
     public function __construct(private readonly CancelAppointmentAction $cancelAppointmentAction) {}
 
-    public function store(array $data): Doctor
+    public function store(StoreDoctorData $dto): Doctor
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($dto) {
             $user = User::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'] ?? null,
-                'password' => Hash::make($data['password']),
+                'first_name' => $dto->firstName,
+                'last_name' => $dto->lastName,
+                'email' => $dto->email,
+                'phone' => $dto->phone,
+                'password' => Hash::make($dto->password),
                 'user_status' => UserStatus::APPROVED->value,
             ]);
 
             $user->assignRole(RoleEnum::DOCTOR->value);
 
             return $user->doctor()->create([
-                'specialization' => $data['specialization'],
-                'bio' => $data['bio'],
-                'education' => $data['education'],
-                'certification' => $data['certification'],
-                'years_of_experience' => $data['years_of_experience'],
-                'session_price' => $data['session_price'],
-                'license_number' => $data['license_number'],
-                'gender' => $data['gender'],
+                'specialization' => $dto->specialization,
+                'bio' => $dto->bio,
+                'education' => $dto->education,
+                'certification' => $dto->certification,
+                'years_of_experience' => $dto->yearsOfExperience,
+                'session_price' => $dto->sessionPrice,
+                'license_number' => $dto->licenseNumber,
+                'gender' => $dto->gender->value,
             ]);
         });
     }
 
-    public function update(Doctor $doctor, array $data): Doctor
+    public function update(Doctor $doctor, UpdateDoctorData $dto): Doctor
     {
-        return DB::transaction(function () use ($doctor, $data) {
-            $doctor->user->update(array_filter([
-                'first_name' => $data['first_name'] ?? null,
-                'last_name' => $data['last_name'] ?? null,
-                'email' => $data['email'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'password' => isset($data['password']) ? Hash::make($data['password']) : null,
-            ], static fn ($value) => $value !== null));
+        return DB::transaction(function () use ($doctor, $dto) {
+            if ($dto->hasUserChanges()) {
+                $userPayload = array_filter([
+                    'first_name' => $dto->firstName,
+                    'last_name' => $dto->lastName,
+                    'email' => $dto->email,
+                    'phone' => $dto->phone,
+                    'password' => $dto->password !== null ? Hash::make($dto->password) : null,
+                ], static fn ($value) => $value !== null);
 
-            $doctor->update(array_filter([
-                'specialization' => $data['specialization'] ?? null,
-                'bio' => $data['bio'] ?? null,
-                'education' => $data['education'] ?? null,
-                'certification' => $data['certification'] ?? null,
-                'years_of_experience' => $data['years_of_experience'] ?? null,
-                'session_price' => $data['session_price'] ?? null,
-                'license_number' => $data['license_number'] ?? null,
-                'gender' => $data['gender'] ?? null,
-            ], static fn ($value) => $value !== null));
+                $doctor->user->update($userPayload);
+            }
+
+            if ($dto->hasDoctorChanges()) {
+                $doctorPayload = array_filter([
+                    'specialization' => $dto->specialization,
+                    'bio' => $dto->bio,
+                    'education' => $dto->education,
+                    'certification' => $dto->certification,
+                    'years_of_experience' => $dto->yearsOfExperience,
+                    'session_price' => $dto->sessionPrice,
+                    'license_number' => $dto->licenseNumber,
+                    'gender' => $dto->gender?->value,
+                ], static fn ($value) => $value !== null);
+
+                $doctor->update($doctorPayload);
+            }
 
             return $doctor->fresh()->load('user');
         });

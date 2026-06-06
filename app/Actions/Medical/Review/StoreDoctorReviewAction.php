@@ -3,15 +3,23 @@
 namespace App\Actions\Medical\Review;
 
 use App\DTOs\Review\StoreDoctorReviewData;
-use App\Exceptions\BusinessLogicException;
 use App\Enums\Medical\AppointmentStatus;
+use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
 use App\Models\DoctorReview;
+use Illuminate\Http\Request;
 
 class StoreDoctorReviewAction
 {
-    public function execute(int $patientId, int $doctorId, StoreDoctorReviewData $dto)
+    public function execute(int $doctorId, StoreDoctorReviewData $dto, Request $request): DoctorReview
     {
+        $patient = $request->user()->patient;
+
+        if (! $patient) {
+            throw new BusinessLogicException('Only patients can submit reviews.');
+        }
+
+        $patientId = $patient->id;
 
         $completedAppointmentsCount = Appointment::query()
             ->where('patient_id', $patientId)
