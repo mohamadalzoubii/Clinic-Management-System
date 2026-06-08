@@ -4,8 +4,8 @@ namespace App\DTOs\Patient;
 
 use App\Enums\Medical\BloodType;
 use App\Enums\Medical\Gender;
-use App\Http\Requests\Admin\UpdatePatientRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 readonly class UpdatePatientData
 {
@@ -30,21 +30,33 @@ readonly class UpdatePatientData
     {
         $validated = $request->validated();
 
+        $emergencyFullName = null;
+        $emFirstName = Arr::get($validated, 'emergency_contact.first_name');
+        $emLastName = Arr::get($validated, 'emergency_contact.last_name');
+
+        if ($emFirstName || $emLastName) {
+            $emergencyFullName = trim($emFirstName.' '.$emLastName);
+        }
+
         return new self(
-            firstName: $validated['first_name'] ?? null,
-            lastName: $validated['last_name'] ?? null,
-            email: $validated['email'] ?? null,
-            phone: $validated['phone'] ?? null,
-            password: $validated['password'] ?? null,
-            dateOfBirth: $validated['date_of_birth'] ?? null,
-            emergencyContactName: $validated['emergency_contact_name'] ?? null,
-            emergencyContactPhone: $validated['emergency_contact_phone'] ?? null,
-            allergies: $validated['allergies'] ?? null,
-            chronicDiseases: $validated['chronic_diseases'] ?? null,
-            weight: isset($validated['weight']) ? (float) $validated['weight'] : null,
-            height: isset($validated['height']) ? (float) $validated['height'] : null,
-            gender: isset($validated['gender']) ? Gender::from($validated['gender']) : null,
-            bloodType: isset($validated['blood_type']) ? BloodType::from($validated['blood_type']) : null,
+            firstName: Arr::get($validated, 'personal_data.first_name'),
+            lastName: Arr::get($validated, 'personal_data.last_name'),
+            email: Arr::get($validated, 'personal_data.email'),
+            phone: Arr::get($validated, 'personal_data.phone_number'),
+            password: Arr::get($validated, 'personal_data.password'),
+            dateOfBirth: Arr::get($validated, 'personal_data.date_of_birth'),
+            emergencyContactName: $emergencyFullName ?: null,
+            emergencyContactPhone: Arr::get($validated, 'emergency_contact.phone_number'),
+            allergies: Arr::get($validated, 'health_assessment.allergies'),
+            chronicDiseases: Arr::get($validated, 'health_assessment.chronic_condition'),
+            weight: Arr::has($validated, 'health_assessment.weight') ? (float) Arr::get($validated,
+                'health_assessment.weight') : null,
+            height: Arr::has($validated, 'health_assessment.height') ? (float) Arr::get($validated,
+                'health_assessment.height') : null,
+            gender: Arr::has($validated, 'personal_data.gender') ? Gender::from(Arr::get($validated,
+                'personal_data.gender')) : null,
+            bloodType: Arr::has($validated, 'health_assessment.blood_type') ? BloodType::from(Arr::get($validated,
+                'health_assessment.blood_type')) : null,
         );
     }
 

@@ -28,8 +28,7 @@ Route::post('/admin/login', [AuthController::class, 'AdminLogin']);
 Route::post('/secretary/login', [AuthController::class, 'SecretaryLogin']);
 
 Route::middleware(['auth:sanctum', 'role:admin|secretary|patient'])->group(function () {
-    Route::controller(PackageController::class)->prefix('packages')->group(function (
-    ) {
+    Route::controller(PackageController::class)->prefix('packages')->group(function () {
         Route::get('/', 'index');
         Route::get('/{package}', 'show');
     });
@@ -104,8 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/medical-tests', [PatientMediaController::class, 'uploadMedicalTests']);
         });
 
-        Route::prefix('appointments')->controller(AppointmentController::class)->group(function (
-        ) {
+        Route::prefix('appointments')->controller(AppointmentController::class)->group(function () {
             Route::patch('/{appointment}/no-show', 'markNoShow');
             Route::patch('/{appointment}/cancel', 'cancelAsDoctor');
         });
@@ -140,8 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/patients/{patient}/buy-package',
             [PatientPackageController::class, 'buyPackageForPatient']);
 
-        Route::controller(PackageController::class)->prefix('packages')->group(function (
-        ) {
+        Route::controller(PackageController::class)->prefix('packages')->group(function () {
             Route::get('/', 'index');
             Route::post('/', 'store');
             Route::get('/{package}', 'show');
@@ -155,8 +152,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/{appointment}', 'destroy');
         });
 
-        Route::controller(ScheduleController::class)->prefix('schedules')->group(function (
-        ) {
+        Route::controller(ScheduleController::class)->prefix('schedules')->group(function () {
             Route::get('/', 'index');
         });
 
@@ -175,8 +171,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('/{vacation}/drop', 'drop');
         });
 
-        Route::controller(SecretaryController::class)->prefix('secretaries')->group(function (
-        ) {
+        Route::controller(SecretaryController::class)->prefix('secretaries')->group(function () {
             Route::get('/', 'index');
             Route::post('/', 'store');
             Route::get('/{secretary}', 'show');
@@ -219,6 +214,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('/doctors', [DoctorController::class, 'index']);
+    Route::get('/doctors/specializations', [DoctorController::class, 'specializations']);
     Route::get('/doctors/{doctor}', [DoctorController::class, 'show']);
     Route::get('/doctors/{doctor}/available-days', [DoctorAvailabilityController::class, 'getAvailableDays']);
     Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);

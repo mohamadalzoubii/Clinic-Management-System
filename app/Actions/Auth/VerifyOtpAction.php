@@ -18,15 +18,15 @@ class VerifyOtpAction
             ->valid()
             ->first();
 
-        if (!$otpRecord) {
+        if (! $otpRecord) {
             throw ValidationException::withMessages([
-                'code' => 'the code is not correct or expiers'
+                'code' => 'the code is not correct or expiers',
             ]);
         }
 
-        if (!Hash::check($dto->code, $otpRecord->code)) {
+        if (! Hash::check($dto->code, $otpRecord->code)) {
             throw ValidationException::withmessages([
-                'code' => 'the code uncorrect'
+                'code' => 'the code uncorrect',
             ]);
         }
 
@@ -37,6 +37,11 @@ class VerifyOtpAction
 
         $otpRecord->delete();
 
-        return $user;
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return [
+            'user' => $user,
+            'token' => $token,
+        ];
     }
 }

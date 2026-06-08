@@ -46,21 +46,20 @@ class AuthController extends Controller
 
     public function verify(verifyOtpRequest $request, VerifyOtpAction $action)
     {
-
         $validated = $request->validated();
 
         $dto = new VerifyOtpData(
             email: $validated['email'],
             code: $validated['code']
-
         );
 
-        $user = $action->execute($dto);
+        $result = $action->execute($dto);
 
         return $this->ok(
-            'Welcom, your account is active you can login now',
+            'Welcome, your account is active and you are authenticated',
             [
-                'user' => new UserResource($user),
+                'user' => new UserResource($result['user']),
+                'token' => $result['token'],
             ]
         );
     }

@@ -18,6 +18,7 @@ use App\Models\Patient;
 use App\Traits\ApiResponses;
 use App\Traits\Filterable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DoctorController extends Controller
 {
@@ -73,7 +74,7 @@ class DoctorController extends Controller
     public function summary(Request $request, GetDoctorSummaryAction $action)
     {
         $doctor = auth()->user()->doctor;
-        if (!$doctor) {
+        if (! $doctor) {
             return $this->error('Unauthorized. Doctor profile not found.', 403);
         }
 
@@ -109,6 +110,27 @@ class DoctorController extends Controller
                 'patient' => new PatientResource($patient->loadMissing('user')),
                 'appointments' => AppointmentResource::collection($appointments),
             ],
+        ]);
+    }
+
+    public function specializations()
+    {
+
+        $doctorsCount = Doctor::select('specialization', DB::raw('count(*) as count'))
+            ->groupBy('specialization')
+            ->pluck('count', 'specialization');
+
+        $specializationsStats = collect(DoctorSpecialization::cases())->map(function ($specialization) use (
+            $doctorsCount
+        ) {
+            return [
+                'specialization' => $specialization->value,
+                'doctors_count' => $doctorsCount->get($specialization->value, 0),
+            ];
+        });
+
+        return $this->ok('Specializations statistics retrieved successfully.', [
+            'data' => $specializationsStats,
         ]);
     }
 }

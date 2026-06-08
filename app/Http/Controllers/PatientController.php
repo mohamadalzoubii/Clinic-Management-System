@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Actions\Medical\Patient\PatientProfileAction;
 use App\DTOs\Patient\PatientProfileData;
+use App\DTOs\Patient\UpdatePatientData;
 use App\Http\Filters\V1\AppointmentFilter;
-use App\Http\Resources\AppointmentResource;
+use App\Http\Requests\Admin\UpdatePatientRequest;
 use App\Http\Requests\Api\V1\Patient\PatientProfileRequest;
-use App\Http\Requests\Api\V1\Patient\PatientProfileUpdateRequest;
 use App\Http\Resources\Api\V1\UserResource;
+use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\PatientResource;
 use App\Models\Appointment;
 use App\Models\Patient;
@@ -43,7 +44,8 @@ class PatientController extends Controller
         return AppointmentResource::collection($appointments);
     }
 
-    public function completeProftile(PatientProfileRequest $request, PatientProfileAction $action)
+
+    public function completeProfile(PatientProfileRequest $request, PatientProfileAction $action)
     {
         $dto = PatientProfileData::fromRequest($request);
 
@@ -51,24 +53,23 @@ class PatientController extends Controller
 
         $user->load('patient');
 
-        return $this->ok(
-            'Your profile is completed successfully',
-            [
-                'user' => (new UserResource($user))->resolve(),
-            ]
-        );
+        return $this->ok('Your profile is completed successfully', [
+            'user' => new UserResource($user),
+        ]);
     }
 
-    public function updateProfile(PatientProfileUpdateRequest $request, PatientProfileAction $action)
-    {
-        $dto = PatientProfileData::fromArray($request->validated());
-        $user = auth()->user();
-        $updatePatinet = $action->execute($user, $dto);
 
-        return $this->ok('your profile is updated successfully',
-            [
-                'user' => new UserResource($updatePatinet),
-            ]
-        );
+    public function updateProfile(PatientProfileRequest $request, PatientProfileAction $action)
+    {
+        $dto = PatientProfileData::fromRequest($request);
+
+
+        $user = $action->execute($request->user(), $dto);
+
+        $user->load('patient');
+
+        return $this->ok('Your profile is updated successfully', [
+            'user' => new UserResource($user),
+        ]);
     }
 }
