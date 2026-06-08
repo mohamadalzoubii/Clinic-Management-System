@@ -22,8 +22,12 @@ class PatientProfileAction
                 ['user_id' => $user->id],
                 [
                     'date_of_birth' => $dto->date_of_birth,
+                    'city' => $dto->city,
                     'emergency_contact_name' => $dto->emergency_contact_name,
                     'emergency_contact_phone' => $dto->emergency_contact_phone,
+                    'emergency_contact_relationship' => $dto->emergency_contact_relationship,
+                    'emergency_contact_email' => $dto->emergency_contact_email,
+                    'emergency_contact_city' => $dto->emergency_contact_city,
                     'allergies' => $dto->allergies,
                     'chronic_diseases' => $dto->chronic_diseases,
                     'weight' => $dto->weight,
@@ -31,7 +35,8 @@ class PatientProfileAction
                     'blood_type' => $dto->blood_type,
                     'is_smoker' => $dto->is_smoker,
                     'drinks_alcohol' => $dto->drinks_alcohol,
-
+                    'smoking_status' => $dto->smoking_status,
+                    'alcohol_status' => $dto->alcohol_status,
                 ]
             );
 

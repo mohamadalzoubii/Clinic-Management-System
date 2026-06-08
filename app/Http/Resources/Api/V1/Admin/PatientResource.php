@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class PatientResource extends JsonResource
@@ -14,25 +15,39 @@ class PatientResource extends JsonResource
             'type' => 'patient',
             'id' => (string) $this->id,
             'attributes' => [
-                'date_of_birth' => $this->date_of_birth,
-                'emergency_contact_name' => $this->emergency_contact_name,
-                'emergency_contact_phone' => $this->emergency_contact_phone,
-                'gender' => $this->gender,
-                'blood_type' => $this->blood_type,
-                'medical_details' => [
+                'personal_data' => [
+                    'first_name' => $this->whenLoaded('user') ? $this->user->first_name : null,
+                    'last_name' => $this->whenLoaded('user') ? $this->user->last_name : null,
+                    'date_of_birth' => $this->date_of_birth?->format('Y-m-d') ?? $this->date_of_birth,
+                    'phone_number' => $this->whenLoaded('user') ? $this->user->phone : null,
+                    'city' => $this->city,
+                    'gender' => $this->gender?->value ?? $this->gender,
+                ],
+                'emergency_contact' => [
+                    'name' => $this->emergency_contact_name,
+                    'relationship' => $this->emergency_contact_relationship,
+                    'phone_number' => $this->emergency_contact_phone,
+                    'email' => $this->emergency_contact_email,
+                    'city' => $this->emergency_contact_city,
+                ],
+                'health_assessment' => [
+                    'blood_type' => $this->blood_type?->value ?? $this->blood_type,
                     'allergies' => $this->allergies,
-                    'chronic_diseases' => $this->chronic_diseases,
-                ],
-                'physical_stats' => [
-                    'weight' => $this->weight,
+                    'chronic_condition' => $this->chronic_diseases,
                     'height' => $this->height,
+                    'weight' => $this->weight,
                 ],
-                'habits' => [
-                    'is_smoker' => $this->is_smoker,
-                    'drinks_alcohol' => $this->drinks_alcohol,
+                'life_style' => [
+                    'is_smoker' => (bool) $this->is_smoker,
+                    'drinks_alcohol' => (bool) $this->drinks_alcohol,
+                    'smoking' => $this->smoking_status,
+                    'alcohol' => $this->alcohol_status,
                 ],
-                'xrays' => $this->formatMediaCollection('xray_images'),
-                'medicalTests' => $this->formatMediaCollection('pathologist_images'),
+                'media' => [
+                    'xrays' => $this->formatMediaCollection('xray_images'),
+                    'medical_tests' => $this->formatMediaCollection('medical_test_images'),
+                    // عدلت الاسم ليطابق المودل عندك (medical_test_images) بدلاً من pathologist_images
+                ],
                 'wallet_balance' => $this->whenLoaded('user') ? $this->user->wallet_balance : null,
                 'status' => $this->whenLoaded('user') ? $this->user->user_status : null,
                 'appointments_count' => $this->appointments_count ?? null,
@@ -50,11 +65,11 @@ class PatientResource extends JsonResource
      */
     private function formatMediaCollection(string $collectionName): array
     {
-        if (!method_exists($this->resource, 'getMedia')) {
+        if (! method_exists($this->resource, 'getMedia')) {
             return [];
         }
 
-        /** @var \Illuminate\Support\Collection<int, Media> $media */
+        /** @var Collection<int, Media> $media */
         $media = $this->resource->getMedia($collectionName);
 
         return $media->map(function (Media $m) {

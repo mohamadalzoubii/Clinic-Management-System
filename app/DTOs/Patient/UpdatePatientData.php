@@ -16,14 +16,22 @@ readonly class UpdatePatientData
         public ?string $phone,
         public ?string $password,
         public ?string $dateOfBirth,
+        public ?string $city,
         public ?string $emergencyContactName,
         public ?string $emergencyContactPhone,
+        public ?string $emergencyContactRelationship,
+        public ?string $emergencyContactEmail,
+        public ?string $emergencyContactCity,
         public ?string $allergies,
         public ?string $chronicDiseases,
         public ?float $weight,
         public ?float $height,
         public ?Gender $gender,
         public ?BloodType $bloodType,
+        public ?bool $isSmoker,
+        public ?bool $drinksAlcohol,
+        public ?string $smokingStatus,
+        public ?string $alcoholStatus,
     ) {}
 
     public static function formRequest(Request $request): self
@@ -38,6 +46,9 @@ readonly class UpdatePatientData
             $emergencyFullName = trim($emFirstName.' '.$emLastName);
         }
 
+        $smokingStatus = Arr::get($validated, 'life_style.smoking');
+        $alcoholStatus = Arr::get($validated, 'life_style.alcohol');
+
         return new self(
             firstName: Arr::get($validated, 'personal_data.first_name'),
             lastName: Arr::get($validated, 'personal_data.last_name'),
@@ -45,8 +56,12 @@ readonly class UpdatePatientData
             phone: Arr::get($validated, 'personal_data.phone_number'),
             password: Arr::get($validated, 'personal_data.password'),
             dateOfBirth: Arr::get($validated, 'personal_data.date_of_birth'),
+            city: Arr::get($validated, 'personal_data.city'),
             emergencyContactName: $emergencyFullName ?: null,
             emergencyContactPhone: Arr::get($validated, 'emergency_contact.phone_number'),
+            emergencyContactRelationship: Arr::get($validated, 'emergency_contact.relationship'),
+            emergencyContactEmail: Arr::get($validated, 'emergency_contact.email'),
+            emergencyContactCity: Arr::get($validated, 'emergency_contact.city'),
             allergies: Arr::get($validated, 'health_assessment.allergies'),
             chronicDiseases: Arr::get($validated, 'health_assessment.chronic_condition'),
             weight: Arr::has($validated, 'health_assessment.weight') ? (float) Arr::get($validated,
@@ -57,6 +72,10 @@ readonly class UpdatePatientData
                 'personal_data.gender')) : null,
             bloodType: Arr::has($validated, 'health_assessment.blood_type') ? BloodType::from(Arr::get($validated,
                 'health_assessment.blood_type')) : null,
+            isSmoker: $smokingStatus !== null ? ($smokingStatus !== 'never' && $smokingStatus !== 'no') : null,
+            drinksAlcohol: $alcoholStatus !== null ? ($alcoholStatus !== 'no') : null,
+            smokingStatus: $smokingStatus,
+            alcoholStatus: $alcoholStatus,
         );
     }
 
@@ -72,13 +91,19 @@ readonly class UpdatePatientData
     public function hasPatientChanges(): bool
     {
         return $this->dateOfBirth !== null
+            || $this->city !== null
             || $this->emergencyContactName !== null
             || $this->emergencyContactPhone !== null
+            || $this->emergencyContactRelationship !== null
+            || $this->emergencyContactEmail !== null
+            || $this->emergencyContactCity !== null
             || $this->allergies !== null
             || $this->chronicDiseases !== null
             || $this->weight !== null
             || $this->height !== null
             || $this->gender !== null
-            || $this->bloodType !== null;
+            || $this->bloodType !== null
+            || $this->smokingStatus !== null
+            || $this->alcoholStatus !== null;
     }
 }

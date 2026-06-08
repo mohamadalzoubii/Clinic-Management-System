@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1\Patient;
 
+use App\Enums\Medical\BloodType;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PatientProfileRequest extends FormRequest
@@ -28,14 +29,16 @@ class PatientProfileRequest extends FormRequest
             'emergency_contact.email' => ['nullable', 'email'],
             'emergency_contact.city' => ['nullable', 'string'],
             'health_assessment' => ['required', 'array'],
-            'health_assessment.blood_type' => ['nullable', 'string'],
+            'health_assessment.blood_type' => [
+                'nullable', 'string', 'in:'.implode(',', array_column(BloodType::cases(), 'value')),
+            ],
             'health_assessment.allergies' => ['nullable', 'string'],
             'health_assessment.chronic_condition' => ['nullable', 'string'],
             'health_assessment.height' => ['nullable', 'numeric'],
             'health_assessment.weight' => ['nullable', 'numeric'],
             'life_style' => ['required', 'array'],
-            'life_style.smoking' => ['nullable', 'string'],
-            'life_style.alcohol' => ['nullable', 'string'],
+            'life_style.smoking' => ['nullable', 'string', 'in:never,occasionally,daily'],
+            'life_style.alcohol' => ['nullable', 'string', 'in:"no","occasionally","regularly"'],
         ];
     }
 }

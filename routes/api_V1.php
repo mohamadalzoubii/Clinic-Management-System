@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:patient')->group(function () {
 
         Route::prefix('patient')->controller(PatientController::class)->group(function () {
-            Route::post('/CompleteProftile', 'completeProftile');
+            Route::post('/CompleteProftile', 'completeProfile');
             Route::put('updateprofile/{patient}', 'updateProfile');
             Route::get('/appointments', 'appointments');
 
@@ -186,10 +186,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(App\Http\Controllers\Api\V1\Secretary\PatientController::class)->prefix('patients')->group(function (
         ) {
             Route::get('/', 'index');
+            Route::post('', 'store');
+
             Route::get('/{patient}', 'show');
             Route::get('/{patient}/appointments', 'appointments');
             Route::get('/{patient}/invoices', 'invoices');
-            Route::post('/', 'store');
             Route::post('/{patient}/buy-package', 'buyPackage');
         });
 

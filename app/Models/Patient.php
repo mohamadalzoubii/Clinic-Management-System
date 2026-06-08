@@ -23,6 +23,9 @@ class Patient extends Model implements HasMedia
         'user_id',
         'emergency_contact_name',
         'emergency_contact_phone',
+        'emergency_contact_relationship',
+        'emergency_contact_email',
+        'emergency_contact_city',
         'allergies',
         'chronic_diseases',
         'weight',
@@ -30,12 +33,17 @@ class Patient extends Model implements HasMedia
         'gender',
         'blood_type',
         'date_of_birth',
+        'city',
+        'smoking_status',
+        'alcohol_status',
+        'is_smoker',
+        'drinks_alcohol'
     ];
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('xray_images'); // multiple images (gallery)
-        $this->addMediaCollection('medical_test_images'); // multiple images (gallery)
+        $this->addMediaCollection('xray_images');
+        $this->addMediaCollection('medical_test_images');
     }
 
     public function user(): BelongsTo
