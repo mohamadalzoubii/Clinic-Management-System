@@ -13,7 +13,7 @@ class AppointmentPolicy
         return $user->doctor && $user->doctor->id === $appointment->doctor_id;
     }
 
-    public function cansal(Uesr $user, Appointment $appointment)
+    public function cansel(Uesr $user, Appointment $appointment)
     {
         return $user->patient && $user->patient->id === $appointment->patient_id;
     }

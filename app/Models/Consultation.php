@@ -41,7 +41,7 @@ class Consultation extends Model
 
     public function prescriptionItems(): HasMany
     {
-        return $this->hasMany(prescriptionItem::class);
+        return $this->hasMany(PrescriptionItem::class);
     }
 
     public function scopeWithFullDetails($query)

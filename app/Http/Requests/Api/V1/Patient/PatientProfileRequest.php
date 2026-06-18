@@ -37,8 +37,8 @@ class PatientProfileRequest extends FormRequest
             'health_assessment.height' => ['nullable', 'numeric'],
             'health_assessment.weight' => ['nullable', 'numeric'],
             'life_style' => ['required', 'array'],
-            'life_style.smoking' => ['nullable', 'string', 'in:never,occasionally,daily'],
-            'life_style.alcohol' => ['nullable', 'string', 'in:"no","occasionally","regularly"'],
+            'life_style.smoking' => ['nullable', 'string', 'in:"yes","occasionally","no"'],
+            'life_style.alcohol' => ['nullable', 'string', 'in:"no","occasionally","yes"'],
         ];
     }
 }

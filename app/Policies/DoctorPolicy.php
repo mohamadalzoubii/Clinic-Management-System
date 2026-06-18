@@ -40,6 +40,8 @@ class DoctorPolicy
         return false;
     }
 
+
+
     public function delete(User $user, Doctor $doctor): bool
     {
         return false;

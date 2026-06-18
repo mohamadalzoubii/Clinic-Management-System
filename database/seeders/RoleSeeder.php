@@ -17,5 +17,16 @@ class RoleSeeder extends Seeder
         foreach (RoleEnum::cases() as $role) {
             Role::firstOrCreate(['name' => $role->value]);
         }
+
+        $permission = \Spatie\Permission\Models\Permission::firstOrCreate([
+            'name' => \App\Enums\PermissionEnum::CREATE->value,
+            'guard_name' => 'web'
+        ]);
+
+
+        $secretaryRole = \Spatie\Permission\Models\Role::where('name', RoleEnum::SECRETARY->value)->first();
+        if ($secretaryRole) {
+            $secretaryRole->givePermissionTo($permission);
+        }
     }
 }

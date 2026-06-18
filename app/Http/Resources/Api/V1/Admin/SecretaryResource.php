@@ -13,6 +13,8 @@ class SecretaryResource extends JsonResource
             'type' => 'secretary',
             'id' => (string) $this->id,
             'attributes' => [
+                'work_days' => $this->work_days,
+                'monthly_salary' => $this->monthly_salary,
                 'created_at' => $this->created_at?->toISOString(),
                 'updated_at' => $this->updated_at?->toISOString(),
             ],
