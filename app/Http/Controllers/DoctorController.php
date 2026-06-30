@@ -66,6 +66,29 @@ public function show(Doctor $doctor)
         ], 201);
     }
 
+    public function doctorReviews(Doctor $doctor)
+{
+    $reviews = $doctor->reviews()
+        ->with('patient.user')
+        ->orderByDesc('created_at')
+        ->get();
+
+    $list = $reviews->map(function ($r) {
+        return [
+            'id' => $r->id,
+            'rating' => $r->rating,
+            'comment' => $r->comment,
+            'patient' => [
+                'name' => $r->patient->user->first_name . ' ' . $r->patient->user->last_name,
+            ],
+            'created_at' => $r->created_at->format('Y-m-d H:i:s'),
+        ];
+    });
+
+    return $this->ok('Doctor reviews retrieved', ['reviews' => $list]);
+}
+
+
     public function dashboard(GetDoctorDashboardStatsAction $action)
     {
         $stats = $action->execute(auth()->user()->doctor->id);

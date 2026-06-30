@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::prefix('doctors')->controller(DoctorController::class)->group(function () {
             Route::post('/{doctor}/reviews', 'storeReview');
+            Route::get('/{doctor}/reviews', 'doctorReviews');
         });
 
         Route::prefix('appointments')->controller(AppointmentController::class)->group(function () {
