@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
         $this->call([RoleSeeder::class]);
         $this->call([AdminAccountSeeder::class]);
         $this->call([SecretaryAccountSeeder::class]);
-        
+
         $doctorUser = User::factory()->create([
             'first_name' => 'doctor',
             'last_name' => 'Test',
@@ -160,7 +160,7 @@ class DatabaseSeeder extends Seeder
         foreach ($doctors as $doctorUser) {
             $this->seedVersionedAgendaForDoctor($doctorUser->doctor, $patients, $adminUserId);
         }
-        
+
         // Seed versioned agendas for the diagnostic specialists
         $this->seedVersionedAgendaForDoctor($radiologist, $patients, $adminUserId);
         $this->seedVersionedAgendaForDoctor($pathologist, $patients, $adminUserId);
@@ -203,7 +203,7 @@ class DatabaseSeeder extends Seeder
                         'appointment_id' => $appointment->id,
                         'doctor_id' => $doctor->id,
                         'patient_id' => $randomPatient->id,
-                        'anamnesis' => 'Patient presented with '.$faker->word().' pain. Vitals are stable. Advised rest and hydration.',
+                        'anamnesis' => 'Patient presented with ' . $faker->word() . ' pain. Vitals are stable. Advised rest and hydration.',
                         'symptoms' => [$faker->word(), $faker->word()],
                         'diagnosis' => 'General Fatigue',
                         'next_visit_date' => $date->copy()->addDays(7)->format('Y-m-d'),
@@ -242,13 +242,15 @@ class DatabaseSeeder extends Seeder
                         'appointment_id' => $appointment->id,
                         'user_id' => $randomPatient->user_id,
                         'amount' => rand(30, 100),
-                        'invoice_number' => 'INV-'.strtoupper($faker->bothify('????-####')),
+                        'invoice_number' => 'INV-' . strtoupper($faker->bothify('????-####')),
                         'status' => 'paid',
                         'paid_at' => $date->copy()->addHours(1),
                     ]);
                 }
             }
         }
+        $this->call([AddDoctorReviewsSeeder::class]);
+        $this->call([UpdateProfileFieldsSeeder::class]);
     }
 
     private function seedVersionedAgendaForDoctor(Doctor $doctor, Collection $patients, ?int $adminUserId = null): void
@@ -323,7 +325,7 @@ class DatabaseSeeder extends Seeder
                 'appointment_id' => $appointment->id,
                 'doctor_id' => $doctor->id,
                 'patient_id' => $patient->id,
-                'anamnesis' => 'Patient presented with '.$faker->word().' pain. Vitals are stable. Advised rest and hydration.',
+                'anamnesis' => 'Patient presented with ' . $faker->word() . ' pain. Vitals are stable. Advised rest and hydration.',
                 'symptoms' => [$faker->word(), $faker->word()],
                 'diagnosis' => 'General Fatigue',
                 'next_visit_date' => $date->copy()->addDays(7)->format('Y-m-d'),
@@ -360,7 +362,7 @@ class DatabaseSeeder extends Seeder
                 'appointment_id' => $appointment->id,
                 'user_id' => $patient->user_id,
                 'amount' => (float) ($doctor->session_price ?? 50.00),
-                'invoice_number' => 'INV-'.strtoupper($faker->bothify('????-####')),
+                'invoice_number' => 'INV-' . strtoupper($faker->bothify('????-####')),
                 'entry_type' => 'appointment_payment',
                 'status' => 'paid',
                 'paid_at' => $date->copy()->addHours(1),
@@ -388,9 +390,9 @@ class DatabaseSeeder extends Seeder
                 ->where('doctor_id', $doctor->id)
                 ->blocking()
                 ->get()
-                ->first(fn (Vacation $vacation) => $vacation->overlapsDate($date));
+                ->first(fn(Vacation $vacation) => $vacation->overlapsDate($date));
 
-            if (! $blockingVacation) {
+            if (!$blockingVacation) {
                 break;
             }
 
@@ -409,7 +411,7 @@ class DatabaseSeeder extends Seeder
             ->where('doctor_id', $doctor->id)
             ->blocking()
             ->get()
-            ->contains(fn (Vacation $vacation) => $vacation->overlapsDate($date));
+            ->contains(fn(Vacation $vacation) => $vacation->overlapsDate($date));
     }
 
     private function seedDoctorVacation(Doctor $doctor, Carbon $startDate, Carbon $endDate, string $submittedBy): void
