@@ -72,4 +72,40 @@ class PatientController extends Controller
             'user' => new UserResource($user),
         ]);
     }
+
+    public function prescriptions()
+{
+    $patient = request()->user()->patient;
+
+    $prescriptions = \App\Models\PrescriptionItem::whereHas('consultation', function ($q) use ($patient) {
+        $q->where('patient_id', $patient->id);
+    })
+        ->with(['consultation.doctor.user', 'consultation.appointment'])
+        ->orderByDesc('created_at')
+        ->get();
+
+    $list = $prescriptions->map(function ($p) {
+        $doc = $p->consultation->doctor;
+        $appt = $p->consultation->appointment;
+
+        return [
+            'id' => $p->id,
+            'medicine_name' => $p->medicine_name,
+            'category' => $p->category,
+            'dosage' => $p->dosage,
+            'form_and_quantity' => $p->form_and_quantity,
+            'frequency' => $p->frequency,
+            'duration' => $p->duration,
+            'special_instructions' => $p->special_instructions,
+            'doctor' => [
+                'id' => $doc->id,
+                'name' => $doc->user->first_name . ' ' . $doc->user->last_name,
+            ],
+            'prescribed_on' => $appt?->appointment_date,
+        ];
+    });
+
+    return $this->ok('Prescriptions retrieved', ['prescriptions' => $list]);
+}
+
 }

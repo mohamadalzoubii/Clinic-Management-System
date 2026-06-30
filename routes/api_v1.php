@@ -42,7 +42,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/CompleteProftile', 'completeProfile');
             Route::put('updateprofile/{patient}', 'updateProfile');
             Route::get('/appointments', 'appointments');
-
+            Route::get('/{patient}/visit-summary', 'visitSummary');
+            Route::get('/prescriptions', 'prescriptions');
         });
 
         Route::prefix('patient/media')->group(function () {
