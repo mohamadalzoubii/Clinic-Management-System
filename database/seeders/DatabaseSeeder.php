@@ -65,7 +65,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Patient',
             'last_name' => 'Test',
             'email' => 'patient@test.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Zain1234'),
             'user_status' => 'approved',
         ]);
 
