@@ -27,7 +27,8 @@ class DoctorController extends Controller
         $doctors = Doctor::filter($filter)
             ->with('user')
             ->withCount('appointments')
-            ->withAvg('reviews as rating_average', 'rating')
+            // ->withAvg('reviews as rating_average', 'rating')
+            ->withAvg('reviews', 'rating')
             ->latest()
             ->paginate(10);
 

@@ -25,22 +25,28 @@ class DoctorController extends Controller
     use ApiResponses, Filterable;
 
     public function index(DoctorFilter $filter)
-    {
-        $doctors = Doctor::filter($filter)
-            ->whereNotIn('specialization', [
-                DoctorSpecialization::RADIOLOGIST->value,
-                DoctorSpecialization::PATHOLOGIST->value,
-            ])
-            ->with('user')
-            ->paginate(10);
+{
+    $doctors = Doctor::filter($filter)
+        ->whereNotIn('specialization', [
+            DoctorSpecialization::RADIOLOGIST->value,
+            DoctorSpecialization::PATHOLOGIST->value,
+        ])
+        ->with('user')
+        ->withAvg('reviews', 'rating')
+        ->withCount('reviews')  
+        ->paginate(10);
 
-        return DoctorResource::collection($doctors);
-    }
+    return DoctorResource::collection($doctors);
+}
 
-    public function show(Doctor $doctor)
-    {
-        return new DoctorResource($doctor->loadMissing('reviews', 'user'));
-    }
+public function show(Doctor $doctor)
+{
+    return new DoctorResource(
+        $doctor->loadMissing('reviews', 'user')
+               ->loadAvg('reviews', 'rating')
+               ->loadCount('reviews')
+    );
+}
 
     public function storeReview(
         StoreDoctorReviewRequest $request,

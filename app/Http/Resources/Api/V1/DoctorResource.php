@@ -24,7 +24,8 @@ class DoctorResource extends JsonResource
                 'license_number' => $this->license_number,
                 'bio' => $this->bio,
                 'session_price' => $this->session_price,
-
+                'average_rating' => $this->reviews_avg_rating ? round($this->reviews_avg_rating, 1) : 0,
+        'total_reviews_count' => $this->reviews_count ?? 0,
                 // Spatie Media Library: exposed by Doctor model as getDoctorPhotoUrlAttribute()
                 'photo_url' => $this->doctor_photo_url ?? null,
 
