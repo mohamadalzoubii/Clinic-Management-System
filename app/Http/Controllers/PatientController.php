@@ -73,6 +73,39 @@ class PatientController extends Controller
         ]);
     }
 
+    public function visitSummary()
+    {
+        $patient = request()->user()->patient;
+
+        $consultations = \App\Models\Consultation::where('patient_id', $patient->id)
+            ->with(['doctor.user', 'appointment'])
+            ->orderByDesc('created_at')
+            ->get();
+
+
+    $visits = $consultations->map(function ($c) {
+        $appt = $c->appointment;
+        $doc = $c->doctor;
+        return [
+            'id' => $c->id,
+            'visit_date' => $appt?->appointment_date,
+            'doctor' => [
+                'id' => $doc->id,
+                'name' => $doc->user->first_name . ' ' . $doc->user->last_name,
+            ],
+            'consultation' => [
+                'anamnesis' => $c->anamnesis,
+                'symptoms' => $c->symptoms,
+                'diagnosis' => $c->diagnosis,
+                'next_visit_date' => $c->next_visit_date?->format('Y-m-d'),
+            ],
+        ];
+    });
+
+    return $this->ok('Visit summary retrieved', ['visits' => $visits]);
+}
+
+
     public function prescriptions()
 {
     $patient = request()->user()->patient;
