@@ -82,46 +82,58 @@ class PatientController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+            
+        $visits = $consultations->map(function ($c) {
+            $appt = $c->appointment;
+            $doc = $c->doctor;
+            return [
+                'id' => $c->id,
+                'visit_date' => $appt?->appointment_date,
+                'doctor' => [
+                    'id' => $doc->id,
+                    'name' => $doc->user->first_name . ' ' . $doc->user->last_name,
+                ],
+                'consultation' => [
+                    'anamnesis' => $c->anamnesis,
+                    'symptoms' => $c->symptoms,
+                    'diagnosis' => $c->diagnosis,
+                    'next_visit_date' => $c->next_visit_date?->format('Y-m-d'),
+                ],
+            ];
+        });
 
-    $visits = $consultations->map(function ($c) {
-        $appt = $c->appointment;
-        $doc = $c->doctor;
-        return [
-            'id' => $c->id,
-            'visit_date' => $appt?->appointment_date,
-            'doctor' => [
-                'id' => $doc->id,
-                'name' => $doc->user->first_name . ' ' . $doc->user->last_name,
-            ],
-            'consultation' => [
-                'anamnesis' => $c->anamnesis,
-                'symptoms' => $c->symptoms,
-                'diagnosis' => $c->diagnosis,
-                'next_visit_date' => $c->next_visit_date?->format('Y-m-d'),
-            ],
-        ];
-    });
+        return $this->ok('Visit summary retrieved', ['visits' => $visits]);
+    }
 
-    return $this->ok('Visit summary retrieved', ['visits' => $visits]);
-}
 
+
+    public function walletBalance()
+    {
+        $patient = request()->user()->patient;
+
+        $walletBalance = $patient->user?->wallet_balance;
+
+        return $this->ok('Wallet balance retrieved', [
+            'wallet_balance' => $walletBalance,
+        ]);
+    }
 
     public function prescriptions()
-{
-    $patient = request()->user()->patient;
+    {
+        $patient = request()->user()->patient;
 
-    $prescriptions = \App\Models\PrescriptionItem::whereHas('consultation', function ($q) use ($patient) {
-        $q->where('patient_id', $patient->id);
-    })
-        ->with(['consultation.doctor.user', 'consultation.appointment'])
-        ->orderByDesc('created_at')
-        ->get();
+        $prescriptions = \App\Models\PrescriptionItem::whereHas('consultation', function ($q) use ($patient) {
+            $q->where('patient_id', $patient->id);
+        })
+            ->with(['consultation.doctor.user', 'consultation.appointment'])
+            ->orderByDesc('created_at')
+            ->get();
 
-    $list = $prescriptions->map(function ($p) {
-        $doc = $p->consultation->doctor;
-        $appt = $p->consultation->appointment;
+        $list = $prescriptions->map(function ($p) {
+            $doc = $p->consultation->doctor;
+            $appt = $p->consultation->appointment;
 
-        return [
+            return [
             'id' => $p->id,
             'medicine_name' => $p->medicine_name,
             'category' => $p->category,

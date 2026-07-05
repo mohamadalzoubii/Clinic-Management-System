@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('updateprofile/{patient}', 'updateProfile');
             Route::get('/appointments', 'appointments');
             Route::get('/visit-summary', 'visitSummary');
+            Route::get('/wallet-balance', 'walletBalance');
             Route::get('/prescriptions', 'prescriptions');
         });
 
