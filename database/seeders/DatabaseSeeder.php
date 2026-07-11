@@ -166,7 +166,17 @@ class DatabaseSeeder extends Seeder
         $this->seedVersionedAgendaForDoctor($pathologist, $patients, $adminUserId);
 
         // 6. Generate "The Living System" (Appointments, Consultations, Prescriptions, Invoices, Reviews)
+        //    plus deterministic extra history for demo/testing.
         $appointmentStatuses = AppointmentStatus::cases();
+
+        // Ensure Patient "Patient Test" has at least 3 COMPLETED appointments with Doctor "doctor Test".
+        // Requirement: add 3 more completed appointments (do NOT delete existing ones).
+        $this->seedAdditionalCompletedAppointments(
+            doctor: $doctor,
+            patient: $patient,
+            count: 3
+        );
+
 
         // Merge standard doctors with newly created specialists so they all receive simulation history
         $allDoctorUsers = $doctors->concat([$radiologistUser, $pathologistUser]);
@@ -255,8 +265,94 @@ class DatabaseSeeder extends Seeder
         $this->call([AddPatientMediaSeeder::class]);
     }
 
+    private function seedAdditionalCompletedAppointments(Doctor $doctor, Patient $patient, int $count): void
+    {
+        $faker = Factory::create();
+
+        // Create 3 additional completed appointments deterministically and idempotently.
+        // If the seeder is re-run, we avoid duplicates by checking (doctor_id, patient_id, appointment_date, start_time, status).
+        $baseDate = Carbon::now()->subDays(90);
+
+        for ($i = 0; $i < $count; $i++) {
+            $date = $baseDate->copy()->addDays($i * 7);
+            $startTime = '10:00:00';
+            $endTime = '10:30:00';
+
+            $existing = Appointment::query()
+                ->where('doctor_id', $doctor->id)
+                ->where('patient_id', $patient->id)
+                ->where('appointment_date', $date->format('Y-m-d'))
+                ->where('start_time', $startTime)
+                ->where('end_time', $endTime)
+                ->where('status', AppointmentStatus::COMPLETED->value)
+                ->exists();
+
+            if ($existing) {
+                continue;
+            }
+
+            $appointment = Appointment::create([
+                'patient_id' => $patient->id,
+                'doctor_id' => $doctor->id,
+                'appointment_date' => $date->format('Y-m-d'),
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'status' => AppointmentStatus::COMPLETED->value,
+                'reason' => $faker->sentence(),
+            ]);
+
+            $consultation = Consultation::create([
+                'appointment_id' => $appointment->id,
+                'doctor_id' => $doctor->id,
+                'patient_id' => $patient->id,
+                'anamnesis' => 'Patient presented with ' . $faker->word() . ' pain. Vitals are stable. Advised rest and hydration.',
+                'symptoms' => [$faker->word(), $faker->word()],
+                'diagnosis' => 'General Fatigue',
+                'next_visit_date' => $date->copy()->addDays(7)->format('Y-m-d'),
+            ]);
+
+            $consultation->prescriptionItems()->createMany([
+                [
+                    'medicine_name' => 'Amoxicillin',
+                    'category' => 'Antibiotic',
+                    'dosage' => '500mg',
+                    'form_and_quantity' => '14 capsules',
+                    'frequency' => 'Twice daily',
+                    'duration' => '7 days',
+                    'special_instructions' => 'Take after meals',
+                    'storage_instructions' => 'Store in a cool dry place',
+                    'side_effects' => 'Nausea or mild stomach upset',
+                    'allergy_warnings' => 'Avoid if allergic to penicillin',
+                ],
+                [
+                    'medicine_name' => 'Ibuprofen',
+                    'category' => 'NSAID (Painkiller)',
+                    'dosage' => '400mg',
+                    'form_and_quantity' => '10 tablets',
+                    'frequency' => 'As needed for pain',
+                    'duration' => '3 days',
+                    'special_instructions' => 'Do not exceed 3 tablets in 24 hours',
+                    'storage_instructions' => null,
+                    'side_effects' => null,
+                    'allergy_warnings' => null,
+                ],
+            ]);
+
+            Invoice::create([
+                'appointment_id' => $appointment->id,
+                'user_id' => $patient->user_id,
+                'amount' => (float) ($doctor->session_price ?? 50.00),
+                'invoice_number' => 'INV-' . strtoupper($faker->bothify('????-####')),
+                'entry_type' => 'appointment_payment',
+                'status' => 'paid',
+                'paid_at' => $date->copy()->addHours(1),
+            ]);
+        }
+    }
+
 
     private function seedVersionedAgendaForDoctor(Doctor $doctor, Collection $patients, ?int $adminUserId = null): void
+
     {
         $faker = Factory::create();
         $versionService = app(DoctorScheduleVersionService::class);
