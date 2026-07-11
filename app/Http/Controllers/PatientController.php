@@ -92,6 +92,8 @@ class PatientController extends Controller
                 'doctor' => [
                     'id' => $doc->id,
                     'name' => $doc->user->first_name . ' ' . $doc->user->last_name,
+                    'specialization' => $doc->specialization,
+                    'photo_url' => $doc->doctor_photo_url,
                 ],
                 'consultation' => [
                     'anamnesis' => $c->anamnesis,
