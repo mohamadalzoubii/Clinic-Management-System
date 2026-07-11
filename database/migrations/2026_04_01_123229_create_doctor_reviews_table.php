@@ -20,9 +20,8 @@ return new class extends Migration
             $table->text('comment');
             $table->tinyInteger('rating')->nullable();
 
-            $table->unique('doctor_id','patient_id');
-            
             $table->timestamps();
+
         });
     }
 

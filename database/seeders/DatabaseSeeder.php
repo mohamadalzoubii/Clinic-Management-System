@@ -252,8 +252,9 @@ class DatabaseSeeder extends Seeder
         $this->call([AddDoctorReviewsSeeder::class]);
         $this->call([UpdateProfileFieldsSeeder::class]);
         $this->call([AddConsultationsSeeder::class]);
-        
+        $this->call([AddPatientMediaSeeder::class]);
     }
+
 
     private function seedVersionedAgendaForDoctor(Doctor $doctor, Collection $patients, ?int $adminUserId = null): void
     {
