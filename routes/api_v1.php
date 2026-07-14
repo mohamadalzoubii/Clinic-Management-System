@@ -76,8 +76,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/patients', [PatientController::class, 'index']);
         Route::get('/patients/{patient}', [PatientController::class, 'show']);
 
-        // Added: Allow clinical staff to read specific patient visual history archives
-
         Route::get('/doctors/dashboard', [DoctorController::class, 'dashboard']);
         Route::get('/doctors/summary', [DoctorController::class, 'summary']);
         Route::get('/doctors/summary/patients/{patient}/appointments',

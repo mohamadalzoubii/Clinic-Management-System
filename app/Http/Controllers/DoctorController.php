@@ -107,15 +107,15 @@ public function show(Doctor $doctor)
             return $this->error('Unauthorized. Doctor profile not found.', 403);
         }
 
-        $doctorId = $doctor->id;
         $search = trim((string) $request->query('search', ''));
 
-        $patients = $action->execute($doctorId, $search);
+        // If doctor_id is not required, pass null to get summary for ALL doctors
+        $patients = $action->execute(null, $search);
 
         return $this->ok('Doctor summary retrieved successfully.', [
             'type' => 'doctor_summary',
             'data' => [
-                'doctor_id' => $doctorId,
+                'doctor_id' => null,
                 'patients' => $patients,
             ],
         ]);
@@ -126,15 +126,17 @@ public function show(Doctor $doctor)
         Patient $patient,
         GetDoctorPatientAppointmentsAction $action,
     ) {
-        $doctorId = auth()->user()->doctor->id;
         $date = $request->query('date');
+        $search = $request->query('search');
+        $specialization = $request->query('specialization');
 
-        $appointments = $action->execute($doctorId, $patient, $date);
+        // pass null to include appointments across ALL doctors
+        $appointments = $action->execute(null, $patient, $date, $search, $specialization);
 
         return $this->ok('Patient appointments retrieved successfully.', [
             'type' => 'doctor_summary_patient_appointments',
             'data' => [
-                'doctor_id' => $doctorId,
+                'doctor_id' => null,
                 'patient_id' => $patient->id,
                 'patient' => new PatientResource($patient->loadMissing('user')),
                 'appointments' => AppointmentResource::collection($appointments),

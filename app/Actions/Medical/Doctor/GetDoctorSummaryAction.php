@@ -7,10 +7,10 @@ use Illuminate\Support\Collection;
 
 class GetDoctorSummaryAction
 {
-    public function execute(int $doctorId, string $search = ''): Collection
+    public function execute(?int $doctorId = null, string $search = ''): Collection
     {
         $appointments = Appointment::query()
-            ->where('doctor_id', $doctorId)
+            ->when($doctorId, fn ($q) => $q->where('doctor_id', $doctorId))
             ->completed()
             ->when($search !== '', function ($query) use ($search) {
                 $query->whereHas('patient.user', function ($patientQuery) use ($search) {
@@ -26,12 +26,14 @@ class GetDoctorSummaryAction
         return $appointments
             ->groupBy('patient_id')
             ->map(function ($patientAppointments) {
-                $latestAppointment = $patientAppointments->first();
+                $latestAppointment = $patientAppointments
+                    ->sortByDesc(fn ($a) => [$a->appointment_date->format('Y-m-d'), $a->start_time])
+                    ->first();
 
                 return [
-                    'patient' => $latestAppointment->patient,
+                    'patient' => $latestAppointment?->patient,
                     'completed_appointments_count' => $patientAppointments->count(),
-                    'last_completed_at' => $latestAppointment->created_at,
+                    'last_completed_at' => $latestAppointment?->created_at,
                 ];
             })
             ->values();
