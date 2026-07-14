@@ -66,6 +66,7 @@ class GetDoctorAgendaAction
                         'appointment_id' => $app->id,
                         'patient_id' => $app->patient_id,
                         'patient_name' => $app->patient->user->first_name.' '.$app->patient->user->last_name,
+                        'appointment_date' => Carbon::parse($app->appointment_date)->format('Y-m-d'),
                         'start_time' => Carbon::parse($app->start_time)->format('H:i'),
                         'end_time' => Carbon::parse($app->end_time)->format('H:i'),
                         'status' => $app->status,
