@@ -144,6 +144,9 @@ class PatientController extends Controller
             'frequency' => $p->frequency,
             'duration' => $p->duration,
             'special_instructions' => $p->special_instructions,
+            'storage_instructions' => $p->storage_instructions,
+            'side_effects' => $p->side_effects,
+            'allergy_warnings' => $p->allergy_warnings,
             'doctor' => [
                 'id' => $doc->id,
                 'name' => $doc->user->first_name . ' ' . $doc->user->last_name,
