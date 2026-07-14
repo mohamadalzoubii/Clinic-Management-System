@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Actions\Appointment\MarkAppointmentNoShowAction;
 use App\Actions\Appointment\CancelAppointmentAction;
+use App\Actions\Appointment\RescheduleAppointmentAction;
 use App\Actions\Appointment\StoreAppointmentAction;
 use App\Actions\Medical\Doctor\GetDoctorAvailableSlotsAction;
+use App\DTOs\Appointment\RescheduleAppointmentData;
 use App\DTOs\Appointment\StorAppointmentData;
+
+use App\Http\Requests\Appointment\RescheduleAppointmentRequest;
 use App\Http\Filters\V1\AppointmentFilter;
 use App\Http\Requests\Appointment\StorAppointmentRequest;
 use App\Http\Requests\Doctor\GetAvailableSlotsRequest;
@@ -112,4 +116,24 @@ class AppointmentController extends Controller
             'current_balance' => $result['current_balance'],
         ]);
     }
+
+    public function reschedule(
+        \App\Http\Requests\Appointment\RescheduleAppointmentRequest $request,
+        Appointment $appointment,
+        RescheduleAppointmentAction $action,
+    ) {
+        $patientId = $request->user()->patient->id;
+
+        $dto = RescheduleAppointmentData::formRequest($request);
+
+        $updatedAppointment = $action->execute($appointment, $patientId, $dto);
+
+        return $this->ok(
+            'Appointment rescheduled successfully',
+            [
+                'appointment' => new AppointmentResource($updatedAppointment),
+            ]
+        );
+    }
 }
+

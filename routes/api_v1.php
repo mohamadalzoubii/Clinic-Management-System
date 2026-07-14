@@ -60,7 +60,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('appointments')->controller(AppointmentController::class)->group(function () {
             Route::post('/storeAppointment', 'store');
             Route::patch('/{appointment}/update', 'cansal');
+            Route::patch('/{appointment}/reschedule', 'reschedule')
+                ->middleware('can:reschedule,appointment');
         });
+
 
         Route::get('patient/chat/doctors-threads',
             [ChatController::class, 'getDoctorThreads']);

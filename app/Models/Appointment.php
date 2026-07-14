@@ -26,7 +26,9 @@ class Appointment extends Model
         'reason',
         'notes',
         'reminder_sent',
+        'rescheduled',
     ];
+
 
     public function doctor(): BelongsTo
     {
@@ -138,6 +140,7 @@ class Appointment extends Model
         return [
             'status' => AppointmentStatus::class,
             'appointment_date' => 'date',
+            'rescheduled' => 'boolean',
         ];
     }
 }
