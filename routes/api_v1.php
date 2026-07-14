@@ -107,11 +107,16 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/medical-tests', [PatientMediaController::class, 'uploadMedicalTests']);
         });
 
+        Route::prefix('doctor/chat')->group(function () {
+            Route::get('/patients-threads', [ChatController::class, 'getPatientThreads']);
+        });
+
         Route::prefix('appointments')->controller(AppointmentController::class)->group(function () {
             Route::patch('/{appointment}/no-show', 'markNoShow');
             Route::patch('/{appointment}/cancel', 'cancelAsDoctor');
         });
     });
+
 
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/overview', [AdminDashboardController::class, 'index']);

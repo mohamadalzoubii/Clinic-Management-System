@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Http\Resources\Api\V1;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class PatientThreadResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        $patientName = $this->user
+            ? trim($this->user->first_name . ' ' . $this->user->last_name)
+            : 'Unknown Patient';
+
+        return [
+            'patient_id'         => $this->id,
+            'patient_name'       => $patientName ?: 'Unknown Patient',
+            'patient_image'      => $this->patient_photo_url ?? null,
+            'last_message'      => $this->last_message ?: 'No messages',
+            'last_message_time' => $this->last_message_time ? $this->last_message_time : null,
+            'unread_count'      => (int) ($this->unread_count ?? 0),
+        ];
+    }
+}
+
