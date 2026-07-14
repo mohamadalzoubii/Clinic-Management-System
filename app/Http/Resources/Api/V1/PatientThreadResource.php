@@ -14,12 +14,12 @@ class PatientThreadResource extends JsonResource
             : 'Unknown Patient';
 
         return [
-            'patient_id'         => $this->id,
-            'patient_name'       => $patientName ?: 'Unknown Patient',
-            'patient_image'      => $this->patient_photo_url ?? null,
-            'last_message'      => $this->last_message ?: 'No messages',
+            'patient_id' => $this->id,
+            'patient_name' => $patientName ?: 'Unknown Patient',
+            'last_message' => $this->last_message ?: 'No messages',
             'last_message_time' => $this->last_message_time ? $this->last_message_time : null,
-            'unread_count'      => (int) ($this->unread_count ?? 0),
+            'unread_count' => (int) ($this->unread_count ?? 0),
+            'patient_email' => $this->user?->email,
         ];
     }
 }
