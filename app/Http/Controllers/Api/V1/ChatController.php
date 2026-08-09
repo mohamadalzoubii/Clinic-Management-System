@@ -66,7 +66,9 @@ class ChatController extends Controller
             return $this->error('Unauthorized or Doctor profile not found.', 403);
         }
 
-        $patients = $action->execute($user);
+        $search = $request->query('search');
+
+        $patients = $action->execute($user, $search);
 
         return $this->ok(
             PatientThreadResource::collection($patients),

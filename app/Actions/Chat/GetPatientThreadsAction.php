@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class GetPatientThreadsAction
 {
-    public function execute(User $user): array
+    public function execute(User $user, ?string $search = null): array
     {
         $doctorId = $user->doctor->id;
         $doctorUserId = $user->id;
@@ -48,8 +48,13 @@ class GetPatientThreadsAction
             ->selectSub($lastMessageBodySub, 'last_message')
             ->selectSub($lastMessageTimeSub, 'last_message_time')
             ->selectSub($unreadCountSub, 'unread_count')
+            ->when($search, function ($query) use ($search) {
+                $query->whereHas('user', function ($query) use ($search) {
+                    $query->where('first_name', 'LIKE', '%'.$search.'%')
+                        ->orWhere('last_name', 'LIKE', '%'.$search.'%');
+                });
+            })
             ->get()
             ->all();
     }
 }
-
