@@ -10,17 +10,28 @@ use App\Models\User;
 
 class ChatService
 {
-    public function resolve(User $user, int $receiverId): array
+    public function resolve(User $user, int $receiverUserId): array
     {
-        if ($user->patient) {
-            return [$user->patient->id, $receiverId];
+        // 1. جلب حساب المستخدم الطرف الثاني
+        $receiverUser = clone $user;
+        $receiverUser = User::find($receiverUserId);
+
+        if (! $receiverUser) {
+            throw new BusinessLogicException('Receiver user not found.');
         }
 
-        if ($user->doctor) {
-            return [$receiverId, $user->doctor->id];
+        // 2. إذا كان المرسل مريضاً، والمستلم دكتوراً
+        if ($user->patient && $receiverUser->doctor) {
+            return [$user->patient->id, $receiverUser->doctor->id];
         }
 
-        throw new BusinessLogicException('Unauthorized user type.');
+        // 3. إذا كان المرسل دكتوراً، والمستلم مريضاً
+        if ($user->doctor && $receiverUser->patient) {
+            return [$receiverUser->patient->id, $user->doctor->id];
+        }
+
+        // منع دكتور من مراسلة دكتور، أو مريض من مراسلة مريض
+        throw new BusinessLogicException('Invalid conversation pairing. Chat must be between a doctor and a patient.');
     }
 
     public function getOrCreateConversation(int $patientId, int $doctorId): Conversation

@@ -23,6 +23,10 @@ class PatientPolicy
 
     public function create(User $user): bool
     {
+        if ($user->hasRole(RoleEnum::SECRETARY->value)) {
+            return true;
+        }
+
         return $user->hasPermissionTo(PermissionEnum::CREATE->value);
     }
 

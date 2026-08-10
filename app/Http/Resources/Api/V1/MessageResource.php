@@ -18,7 +18,7 @@ class MessageResource extends JsonResource
                 'is_mine' => $this->sender_user_id === auth()->id(),
                 'body' => $this->body,
                 'is_read' => (bool) $this->is_read,
-                'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+                'created_at' => $this->created_at->timezone('Asia/Damascus')->format('Y-m-d h:i A'),
                 'time_diff' => $this->created_at->diffForHumans(),
             ],
 
