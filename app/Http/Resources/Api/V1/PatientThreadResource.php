@@ -17,7 +17,7 @@ class PatientThreadResource extends JsonResource
             'patient_id' => $this->id,
             'patient_name' => $patientName ?: 'Unknown Patient',
             'last_message' => $this->last_message ?: 'No messages',
-            'last_message_time' => $this->last_message_time ? $this->last_message_time : null,
+            'last_message_time' => $this->last_message_time ? \Carbon\Carbon::parse($this->last_message_time)->setTimezone('Asia/Damascus')->format('Y-m-d h:i A') : null,
             'unread_count' => (int) ($this->unread_count ?? 0),
             'patient_email' => $this->user?->email,
         ];

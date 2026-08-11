@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'doctor',
             'last_name' => 'Test',
             'email' => 'doctor@test.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Password12'),
             'user_status' => 'approved',
         ]);
 
@@ -90,7 +90,7 @@ class DatabaseSeeder extends Seeder
             ->has(Patient::factory(), 'patient')
             ->create([
                 'user_status' => 'approved',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Password12'),
                 'wallet_balance' => rand(50, 300),
             ]);
 
@@ -103,7 +103,7 @@ class DatabaseSeeder extends Seeder
             ->has(Doctor::factory()->has(DoctorSchedule::factory()->count(4), 'schedules'), 'doctor')
             ->create([
                 'user_status' => 'approved',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Password12'),
             ]);
 
         foreach ($doctors as $user) {
@@ -115,7 +115,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Radiologist',
             'last_name' => 'Specialist',
             'email' => 'radiologist@test.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Password12'),
             'user_status' => 'approved',
         ]);
         $radiologistUser->assignRole(RoleEnum::DOCTOR->value);
@@ -131,7 +131,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Pathologist',
             'last_name' => 'Specialist',
             'email' => 'pathologist@test.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Password12'),
             'user_status' => 'approved',
         ]);
         $pathologistUser->assignRole(RoleEnum::DOCTOR->value);

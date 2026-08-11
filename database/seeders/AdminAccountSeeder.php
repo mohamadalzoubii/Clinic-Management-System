@@ -18,7 +18,7 @@ class AdminAccountSeeder extends Seeder
             [
                 'first_name' => 'Admin',
                 'last_name' => 'Test',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Password12'),
                 'user_status' => UserStatus::APPROVED->value,
             ]
         );
