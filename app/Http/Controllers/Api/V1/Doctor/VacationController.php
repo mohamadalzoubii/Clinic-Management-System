@@ -6,6 +6,7 @@ use App\Enums\Medical\VacationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Vacation\StoreDoctorVacationRequest;
 use App\Http\Resources\Api\V1\VacationResource;
+use App\Models\Doctor;
 use App\Models\Vacation;
 use App\Services\VacationService;
 use App\Traits\ApiResponses;
@@ -56,15 +57,15 @@ class VacationController extends Controller
         ], 201);
     }
 
-    public function constraints(int $doctor, VacationService $service)
+    public function constraints(Doctor $doctor, VacationService $service)
     {
-        $earliestAllowed = $service->earliestAllowedStartDate($doctor);
-        $lastAppointmentDay = $service->lastAppointmentDay($doctor);
+        $earliestAllowed = $service->earliestAllowedStartDate($doctor->id);
+        $lastAppointmentDay = $service->lastAppointmentDay($doctor->id);
 
         return $this->ok('Vacation constraints retrieved successfully.', [
             'type' => 'vacation_constraints',
             'attributes' => [
-                'doctor_id' => $doctor,
+                'doctor_id' => $doctor->id,
                 'last_appointment_day' => $lastAppointmentDay?->toDateString(),
                 'earliest_start_date' => $earliestAllowed->toDateString(),
                 'minimum_lead_days' => 14,
