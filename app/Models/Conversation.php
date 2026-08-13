@@ -16,12 +16,12 @@ class Conversation extends Model
 
     public function doctor(): BelongsTo
     {
-        return $this->beloongsTo(Doctor::class);
+        return $this->belongsTo(Doctor::class)->withTrashed();
     }
 
     public function patient(): BelongsTo
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(Patient::class)->withTrashed();
     }
 
     public function messages(): HasMany

@@ -48,22 +48,22 @@ class User extends Authenticatable
 
     public function doctor(): HasOne
     {
-        return $this->hasOne(Doctor::class);
+        return $this->hasOne(Doctor::class)->withTrashed();
     }
 
     public function admin(): HasOne
     {
-        return $this->hasOne(Admin::class);
+        return $this->hasOne(Admin::class)->withTrashed();
     }
 
     public function patient(): HasOne
     {
-        return $this->hasOne(Patient::class);
+        return $this->hasOne(Patient::class)->withTrashed();
     }
 
     public function secretary(): HasOne
     {
-        return $this->hasOne(Secretary::class);
+        return $this->hasOne(Secretary::class)->withTrashed();
     }
 
     public function invoice(): HasOne

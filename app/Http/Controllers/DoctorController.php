@@ -102,9 +102,9 @@ public function show(Doctor $doctor)
 
     public function summary(Request $request, GetDoctorSummaryAction $action)
     {
-        $doctor = auth()->user()->doctor;
-        if (! $doctor) {
-            return $this->error('Unauthorized. Doctor profile not found.', 403);
+        $doctor = auth()->user()->patient;
+        if ($doctor) {
+            return $this->error('Unauthorized. patient profile found.', 403);
         }
 
         $search = trim((string) $request->query('search', ''));

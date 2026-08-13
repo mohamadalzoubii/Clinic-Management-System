@@ -47,7 +47,7 @@ class PatientMediaController extends Controller
 
         $dto = UploadPatientMediaData::formRequest($request);
         $media = $action->execute($dto, 'xray_images');
-
+        $doctor->user->increment('wallet_balance', $doctor->session_price);
         return $this->success($this->transformMedia($media), 'X-Ray image uploaded successfully.', 201);
     }
 
@@ -61,7 +61,7 @@ class PatientMediaController extends Controller
 
         $dto = UploadPatientMediaData::formRequest($request);
         $media = $action->execute($dto, 'medical_test_images');
-
+        $doctor->user->increment('wallet_balance', $doctor->session_price);
         return $this->success($this->transformMedia($media), 'Medical test image uploaded successfully.', 201);
     }
 
