@@ -12,7 +12,6 @@ class StorePatientRequest extends FormRequest
 {
     public function authorize(): bool
     {
-
         return $this->user()?->can('create', Patient::class) ?? false;
     }
 
@@ -24,15 +23,25 @@ class StorePatientRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
             'password' => ['required', 'string', 'min:8'],
+
             'date_of_birth' => ['nullable', 'date'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'gender' => ['nullable', 'string', Rule::enum(Gender::class)],
+
             'emergency_contact_name' => ['nullable', 'string', 'max:255'],
             'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
+            'emergency_contact_relationship' => ['nullable', 'string', 'max:255'],
+            'emergency_contact_email' => ['nullable', 'email', 'max:255'],
+            'emergency_contact_city' => ['nullable', 'string', 'max:255'],
+
+            'blood_type' => ['nullable', 'string', Rule::enum(BloodType::class)],
             'allergies' => ['nullable', 'string'],
             'chronic_diseases' => ['nullable', 'string'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'height' => ['nullable', 'numeric', 'min:0'],
-            'gender' => ['nullable', 'string', Rule::enum(Gender::class)],
-            'blood_type' => ['nullable', 'string', Rule::enum(BloodType::class)],
+
+            'smoking_status' => ['nullable', 'string'],
+            'alcohol_status' => ['nullable', 'string'],
         ];
     }
 }

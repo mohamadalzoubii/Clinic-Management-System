@@ -18,9 +18,10 @@ class DoctorFilter extends QueryFilter
 
     public function search($value)
     {
-        $this->builder->wherehas('user', function ($query) use ($value) {
-            $query->where('first_name', 'LIKE', '%'.$value.'%')
-                ->orWhere('last_name', 'LIKE', '%'.$value.'%');
+        $this->builder->whereHas('user', function ($query) use ($value) {
+            $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$value}%"])
+                ->orWhere('first_name', 'LIKE', "%{$value}%")
+                ->orWhere('last_name', 'LIKE', "%{$value}%");
         });
     }
 
@@ -49,7 +50,7 @@ class DoctorFilter extends QueryFilter
     }
 
     public function years_of_experience($value)
-{
-    $this->builder->where('years_of_experience', '>=', $value);
-}
+    {
+        $this->builder->where('years_of_experience', '>=', $value);
+    }
 }

@@ -7,9 +7,9 @@ class PatientFilter extends QueryFilter
     public function search($value)
     {
         $this->builder->whereHas('user', function ($query) use ($value) {
-            $query->where('first_name', 'LIKE', '%'.$value.'%')
-                ->orWhere('last_name', 'LIKE', '%'.$value.'%')
-                ->orWhere('email', 'LIKE', '%'.$value.'%');
+            $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$value}%"])
+                ->orWhere('first_name', 'LIKE', "%{$value}%")
+                ->orWhere('last_name', 'LIKE', "%{$value}%");
         });
     }
 
