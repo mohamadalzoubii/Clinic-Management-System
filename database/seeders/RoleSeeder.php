@@ -41,17 +41,16 @@ class RoleSeeder extends Seeder
         // إعطاء السكرتير الصلاحيات الخاصة به
         $secretaryRole = Role::where('name', RoleEnum::SECRETARY->value)->where('guard_name', $guardName)->first();
         if ($secretaryRole) {
-            $secretaryRole->givePermissionTo([
-                PermissionEnum::CREATE->value,
-                // يمكنك لاحقاً إضافة المزيد هنا مثل:
-                // PermissionEnum::UPDATE->value,
-            ]);
+            $permissions = Permission::where('guard_name', $guardName)
+                ->whereIn('name', [PermissionEnum::CREATE->value])
+                ->get();
+            $secretaryRole->givePermissionTo($permissions);
         }
 
         // (اختياري) إعطاء الأدمن جميع الصلاحيات تلقائياً
         $adminRole = Role::where('name', RoleEnum::ADMIN->value)->where('guard_name', $guardName)->first();
         if ($adminRole) {
-            $adminRole->givePermissionTo(Permission::all());
+            $adminRole->givePermissionTo(Permission::where('guard_name', $guardName)->get());
         }
     }
 }

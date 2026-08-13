@@ -14,6 +14,7 @@ class PatientThreadResource extends JsonResource
             : 'Unknown Patient';
 
         return [
+            'user_id' => $this->user_id,
             'patient_id' => $this->id,
             'patient_name' => $patientName ?: 'Unknown Patient',
             'last_message' => $this->last_message ?: 'No messages',

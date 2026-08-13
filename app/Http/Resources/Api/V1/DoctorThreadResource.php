@@ -14,6 +14,7 @@ class DoctorThreadResource extends JsonResource
             : 'Unknown Doctor';
 
         return [
+            'user_id' => $this->user_id,
             'doctor_id' => $this->id,
             'doctor_name' => $doctorName ?: 'Unknown Doctor',
             'doctor_image' => $this->doctor_photo_url,
