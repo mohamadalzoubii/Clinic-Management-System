@@ -37,43 +37,34 @@ readonly class UpdatePatientData
     public static function formRequest(Request $request): self
     {
         $validated = $request->validated();
-
-        $emergencyFullName = null;
-        $emFirstName = Arr::get($validated, 'emergency_contact.first_name');
-        $emLastName = Arr::get($validated, 'emergency_contact.last_name');
-
-        if ($emFirstName || $emLastName) {
-            $emergencyFullName = trim($emFirstName.' '.$emLastName);
-        }
-
-        $smokingStatus = Arr::get($validated, 'life_style.smoking');
-        $alcoholStatus = Arr::get($validated, 'life_style.alcohol');
+        $smokingStatus = Arr::get($validated, 'smoking_status');
+        $alcoholStatus = Arr::get($validated, 'alcohol_status');
 
         return new self(
-            firstName: Arr::get($validated, 'personal_data.first_name'),
-            lastName: Arr::get($validated, 'personal_data.last_name'),
-            email: Arr::get($validated, 'personal_data.email'),
-            phone: Arr::get($validated, 'personal_data.phone_number'),
-            password: Arr::get($validated, 'personal_data.password'),
-            dateOfBirth: Arr::get($validated, 'personal_data.date_of_birth'),
-            city: Arr::get($validated, 'personal_data.city'),
-            emergencyContactName: $emergencyFullName ?: null,
-            emergencyContactPhone: Arr::get($validated, 'emergency_contact.phone_number'),
-            emergencyContactRelationship: Arr::get($validated, 'emergency_contact.relationship'),
-            emergencyContactEmail: Arr::get($validated, 'emergency_contact.email'),
-            emergencyContactCity: Arr::get($validated, 'emergency_contact.city'),
-            allergies: Arr::get($validated, 'health_assessment.allergies'),
-            chronicDiseases: Arr::get($validated, 'health_assessment.chronic_condition'),
-            weight: Arr::has($validated, 'health_assessment.weight') ? (float) Arr::get($validated,
-                'health_assessment.weight') : null,
-            height: Arr::has($validated, 'health_assessment.height') ? (float) Arr::get($validated,
-                'health_assessment.height') : null,
-            gender: Arr::has($validated, 'personal_data.gender') ? Gender::from(Arr::get($validated,
-                'personal_data.gender')) : null,
-            bloodType: Arr::has($validated, 'health_assessment.blood_type') ? BloodType::from(Arr::get($validated,
-                'health_assessment.blood_type')) : null,
-            isSmoker: $smokingStatus !== null ? ($smokingStatus !== 'never' && $smokingStatus !== 'no') : null,
-            drinksAlcohol: $alcoholStatus !== null ? ($alcoholStatus !== 'no') : null,
+            firstName: Arr::get($validated, 'first_name'),
+            lastName: Arr::get($validated, 'last_name'),
+            email: Arr::get($validated, 'email'),
+            phone: Arr::get($validated, 'phone'),
+            password: Arr::get($validated, 'password'),
+            dateOfBirth: Arr::get($validated, 'date_of_birth'),
+            city: Arr::get($validated, 'city'),
+            emergencyContactName: Arr::get($validated, 'emergency_contact_name'),
+            emergencyContactPhone: Arr::get($validated, 'emergency_contact_phone'),
+            emergencyContactRelationship: Arr::get($validated, 'emergency_contact_relationship'),
+            emergencyContactEmail: Arr::get($validated, 'emergency_contact_email'),
+            emergencyContactCity: Arr::get($validated, 'emergency_contact_city'),
+            allergies: Arr::get($validated, 'allergies'),
+            chronicDiseases: Arr::get($validated, 'chronic_diseases'),
+            weight: Arr::has($validated, 'weight') ? (float) Arr::get($validated,
+                'weight') : null,
+            height: Arr::has($validated, 'height') ? (float) Arr::get($validated,
+                'height') : null,
+            gender: Arr::has($validated, 'gender') ? Gender::from(Arr::get($validated,
+                'gender')) : null,
+            bloodType: Arr::has($validated, 'blood_type') ? BloodType::from(Arr::get($validated,
+                'blood_type')) : null,
+            isSmoker: $smokingStatus !== null && strtolower($smokingStatus) !== 'no',
+            drinksAlcohol: $alcoholStatus !== null && strtolower($alcoholStatus) !== 'no',
             smokingStatus: $smokingStatus,
             alcoholStatus: $alcoholStatus,
         );

@@ -58,8 +58,8 @@ readonly class StorePatientData
             height: isset($validated['height']) ? (float) $validated['height'] : null,
             gender: isset($validated['gender']) ? Gender::from($validated['gender']) : null,
             bloodType: isset($validated['blood_type']) ? BloodType::from($validated['blood_type']) : null,
-            isSmoker: $smoking !== null && $smoking !== 'no',
-            drinksAlcohol: $alcohol !== null && $alcohol !== 'no',
+            isSmoker: $smoking !== null && strtolower($smoking) !== 'no',
+            drinksAlcohol: $alcohol !== null && strtolower($alcohol) !== 'no',
             smokingStatus: $smoking,
             alcoholStatus: $alcohol,
         );
