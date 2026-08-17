@@ -212,6 +212,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/appointments/today',
             [App\Http\Controllers\Api\V1\Secretary\AppointmentController::class, 'today']);
+            
+        Route::controller(App\Http\Controllers\Api\V1\Admin\DoctorController::class)->prefix('doctors')->group(function (
+        ) {
+            Route::get('/{doctor}/agenda', 'agenda');
+        });
     });
 
     Route::prefix('chat')->controller(ChatController::class)->group(function () {

@@ -12,7 +12,7 @@ class SendMessageRequest extends FormRequest
         $receiverTable = $this->user()?->doctor ? 'patients' : 'doctors';
 
         return [
-            'receiverId' => ['required', Rule::exists($receiverTable, 'id')],
+            'receiverId' => ['required', Rule::exists($receiverTable, 'user_id')],
             'body' => ['required', 'string', 'max:2000'],
         ];
     }
