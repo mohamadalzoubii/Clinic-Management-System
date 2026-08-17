@@ -9,10 +9,9 @@ use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Models\Package;
 use App\Models\User;
-use App\Services\VacationService;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class FinancialService
 {
@@ -47,6 +46,60 @@ class FinancialService
             ];
 
         });
+    }
+
+    private function ensureInvoiceSchemaSupportsWalletRecharge(): void
+    {
+        $column = DB::selectOne("SHOW COLUMNS FROM invoices WHERE Field = 'appointment_id'");
+
+        if (! $column || (($column->Null ?? 'NO') === 'YES')) {
+            return;
+        }
+
+        try {
+            DB::statement('ALTER TABLE invoices DROP FOREIGN KEY invoices_appointment_id_foreign');
+        } catch (\Throwable $throwable) {
+            // The FK may already be missing in some local databases.
+        }
+
+        DB::statement('ALTER TABLE invoices MODIFY appointment_id BIGINT UNSIGNED NULL');
+
+        try {
+            DB::statement('ALTER TABLE invoices ADD CONSTRAINT invoices_appointment_id_foreign FOREIGN KEY (appointment_id) REFERENCES appointments (id) ON DELETE CASCADE');
+        } catch (\Throwable $throwable) {
+            // If the constraint already exists or the storage engine differs, continue.
+        }
+    }
+
+    private function createInvoice(
+        User $user,
+        ?Appointment $appointment,
+        float $amount,
+        string $entryType,
+        InvoiceStatus $status
+    ): Invoice {
+        $payload = [
+            'appointment_id' => $appointment?->id,
+            'user_id' => $user->id,
+            'amount' => $amount,
+            'invoice_number' => $this->generateInvoiceNumber($entryType, $appointment?->id ?? $user->id),
+            'status' => $status,
+            'paid_at' => now(),
+        ];
+
+        if (Schema::hasColumn('invoices', 'entry_type')) {
+            $payload['entry_type'] = $entryType;
+        }
+
+        return Invoice::create($payload);
+    }
+
+    private function generateInvoiceNumber(string $entryType, int $referenceId): string
+    {
+        $prefix = strtoupper(Str::of($entryType)->replace('_', '-'));
+
+        return 'INV-'.$prefix.'-'.now()->format('YmdHis').'-'.$referenceId.'-'.Str::upper(Str::random(4));
+
     }
 
     public function payForAppointmentAndCreateInvoice(Appointment $appointment)
@@ -131,6 +184,11 @@ class FinancialService
                 'refund_invoice' => $existingRefund,
             ];
         });
+    }
+
+    private function sessionAmountForAppointment(Appointment $appointment): float
+    {
+        return round((float) $appointment->doctor->session_price, 2);
     }
 
     public function refundForPatientCancellation(Appointment $appointment)
@@ -238,6 +296,14 @@ class FinancialService
         });
     }
 
+    private function resolveClinicUser(): User
+    {
+        return Admin::query()
+            ->with('user')
+            ->firstOrFail()
+            ->user;
+    }
+
     public function payoutForCompletion70_30(Appointment $appointment): array
     {
         return DB::transaction(function () use ($appointment) {
@@ -302,65 +368,49 @@ class FinancialService
         });
     }
 
-    private function resolveClinicUser(): User
+    public function refundForEmergencyOverride(Appointment $appointment)
     {
-        return Admin::query()
-            ->with('user')
-            ->firstOrFail()
-            ->user;
-    }
+        return DB::transaction(function () use ($appointment) {
+            $appointment = Appointment::query()
+                ->whereKey($appointment->getKey())
+                ->lockForUpdate()
+                ->with(['doctor.user', 'patient.user'])
+                ->firstOrFail();
 
-    private function sessionAmountForAppointment(Appointment $appointment): float
-    {
-        return round((float) $appointment->doctor->session_price, 2);
-    }
+            $refundAmount = $this->sessionAmountForAppointment($appointment);
+            $patientUser = User::query()
+                ->whereKey($appointment->patient->user_id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-    private function createInvoice(User $user, ?Appointment $appointment, float $amount, string $entryType, InvoiceStatus $status): Invoice
-    {
-        $payload = [
-            'appointment_id' => $appointment?->id,
-            'user_id' => $user->id,
-            'amount' => $amount,
-            'invoice_number' => $this->generateInvoiceNumber($entryType, $appointment?->id ?? $user->id),
-            'status' => $status,
-            'paid_at' => now(),
-        ];
+            $existingRefundQuery = Invoice::query()
+                ->where('appointment_id', $appointment->id)
+                ->where('status', InvoiceStatus::REFUNDED)
+                ->lockForUpdate();
 
-        if (Schema::hasColumn('invoices', 'entry_type')) {
-            $payload['entry_type'] = $entryType;
-        }
+            if (Schema::hasColumn('invoices', 'entry_type')) {
+                $existingRefundQuery->where('entry_type', 'emergency_override_refund');
+            } else {
+                $existingRefundQuery->where('amount', -$refundAmount);
+            }
 
-        return Invoice::create($payload);
-    }
+            $existingRefund = $existingRefundQuery->first();
 
-    private function ensureInvoiceSchemaSupportsWalletRecharge(): void
-    {
-        $column = DB::selectOne("SHOW COLUMNS FROM invoices WHERE Field = 'appointment_id'");
+            if (! $existingRefund) {
+                $patientUser->increment('wallet_balance', $refundAmount);
 
-        if (! $column || (($column->Null ?? 'NO') === 'YES')) {
-            return;
-        }
+                $existingRefund = $this->createInvoice(
+                    user: $patientUser,
+                    appointment: $appointment,
+                    amount: -$refundAmount,
+                    entryType: 'emergency_override_refund',
+                    status: InvoiceStatus::REFUNDED,
+                );
+            }
 
-        try {
-            DB::statement('ALTER TABLE invoices DROP FOREIGN KEY invoices_appointment_id_foreign');
-        } catch (\Throwable $throwable) {
-            // The FK may already be missing in some local databases.
-        }
-
-        DB::statement('ALTER TABLE invoices MODIFY appointment_id BIGINT UNSIGNED NULL');
-
-        try {
-            DB::statement('ALTER TABLE invoices ADD CONSTRAINT invoices_appointment_id_foreign FOREIGN KEY (appointment_id) REFERENCES appointments (id) ON DELETE CASCADE');
-        } catch (\Throwable $throwable) {
-            // If the constraint already exists or the storage engine differs, continue.
-        }
-    }
-
-    private function generateInvoiceNumber(string $entryType, int $referenceId): string
-    {
-        $prefix = strtoupper(Str::of($entryType)->replace('_', '-'));
-
-        return 'INV-'.$prefix.'-'.now()->format('YmdHis').'-'.$referenceId.'-'.Str::upper(Str::random(4));
-
+            return [
+                'refund_invoice' => $existingRefund,
+            ];
+        });
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\DoctorAvailabilityController;
 use App\Http\Controllers\Api\V1\FinancialController;
 use App\Http\Controllers\Api\V1\PatientMediaController;
 use App\Http\Controllers\Api\V1\PatientPackageController;
+use App\Http\Controllers\Api\V1\Secretary\SecretaryEmergencyController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\PatientController;
@@ -63,7 +64,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('/{appointment}/reschedule', 'reschedule')
                 ->middleware('can:reschedule,appointment');
         });
-
 
         Route::get('patient/chat/doctors-threads',
             [ChatController::class, 'getDoctorThreads']);
@@ -116,7 +116,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('/{appointment}/cancel', 'cancelAsDoctor');
         });
     });
-
 
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/overview', [AdminDashboardController::class, 'index']);
@@ -187,6 +186,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{secretary}', 'update');
             Route::delete('/{secretary}', 'destroy');
         });
+    });
+
+    Route::middleware(['auth:sanctum'])->prefix('secretary')->group(function () {
+        Route::get('/doctors', [SecretaryEmergencyController::class, 'doctors']);
+        Route::get('/doctors/{doctor}/available-slots', [SecretaryEmergencyController::class, 'availableSlots']);
+        Route::post('/emergency-book', [SecretaryEmergencyController::class, 'emergencyBook']);
+        Route::get('/doctors/{doctor}/available-days', [SecretaryEmergencyController::class, 'availableDays']);
+        Route::post('/block-slot', [SecretaryEmergencyController::class, 'blockSlot']);
     });
 
     Route::middleware('role:secretary')->prefix('secretary')->group(function () {

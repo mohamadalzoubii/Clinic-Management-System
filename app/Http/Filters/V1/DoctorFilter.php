@@ -51,6 +51,6 @@ class DoctorFilter extends QueryFilter
 
     public function years_of_experience($value)
     {
-        $this->builder->where('years_of_experience', '>=', $value);
+        $this->builder->where('years_of_experience', '<=', $value);
     }
 }

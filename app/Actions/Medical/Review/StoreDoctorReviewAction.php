@@ -31,8 +31,6 @@ class StoreDoctorReviewAction
             throw new BusinessLogicException('You need at least 3 completed appointments with this doctor before leaving a review.');
         }
 
-
-
         return DoctorReview::create([
             'patient_id' => $patientId,
             'doctor_id' => $doctorId,

@@ -25,37 +25,37 @@ class DoctorController extends Controller
     use ApiResponses, Filterable;
 
     public function index(DoctorFilter $filter)
-{
-    $doctors = Doctor::filter($filter)
-        ->whereNotIn('specialization', [
-            DoctorSpecialization::RADIOLOGIST->value,
-            DoctorSpecialization::PATHOLOGIST->value,
-        ])
-        ->with('user')
-        ->withAvg('reviews', 'rating')
-        ->withCount('reviews')  
-        ->paginate(10);
+    {
+        $doctors = Doctor::filter($filter)
+            ->whereNotIn('specialization', [
+                DoctorSpecialization::RADIOLOGIST->value,
+                DoctorSpecialization::PATHOLOGIST->value,
+            ])
+            ->with('user')
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->paginate(10);
 
-    return DoctorResource::collection($doctors);
-}
+        return DoctorResource::collection($doctors);
+    }
 
-public function show(Doctor $doctor)
-{
-    return new DoctorResource(
-        $doctor->loadMissing('reviews', 'user')
-               ->loadAvg('reviews', 'rating')
-               ->loadCount('reviews')
-    );
-}
+    public function show(Doctor $doctor)
+    {
+        return new DoctorResource(
+            $doctor->loadMissing('reviews', 'user')
+                ->loadAvg('reviews', 'rating')
+                ->loadCount('reviews')
+        );
+    }
 
     public function storeReview(
         StoreDoctorReviewRequest $request,
-        int $doctorId,
+        Doctor $doctor,
         StoreDoctorReviewAction $action,
     ) {
         $dto = StoreDoctorReviewData::formRequest($request);
 
-        $review = $action->execute($doctorId, $dto, $request);
+        $review = $action->execute($doctor->id, $dto, $request);
 
         return $this->success('Thank you! Your review has been submitted.', [
             'review' => [
@@ -67,27 +67,26 @@ public function show(Doctor $doctor)
     }
 
     public function doctorReviews(Doctor $doctor)
-{
-    $reviews = $doctor->reviews()
-        ->with('patient.user')
-        ->orderByDesc('created_at')
-        ->get();
+    {
+        $reviews = $doctor->reviews()
+            ->with('patient.user')
+            ->orderByDesc('created_at')
+            ->get();
 
-    $list = $reviews->map(function ($r) {
-        return [
-            'id' => $r->id,
-            'rating' => $r->rating,
-            'comment' => $r->comment,
-            'patient' => [
-                'name' => $r->patient->user->first_name . ' ' . $r->patient->user->last_name,
-            ],
-            'created_at' => $r->created_at->format('Y-m-d H:i:s'),
-        ];
-    });
+        $list = $reviews->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'rating' => $r->rating,
+                'comment' => $r->comment,
+                'patient' => [
+                    'name' => $r->patient->user->first_name.' '.$r->patient->user->last_name,
+                ],
+                'created_at' => $r->created_at->format('Y-m-d H:i:s'),
+            ];
+        });
 
-    return $this->ok('Doctor reviews retrieved', ['reviews' => $list]);
-}
-
+        return $this->ok('Doctor reviews retrieved', ['reviews' => $list]);
+    }
 
     public function dashboard(GetDoctorDashboardStatsAction $action)
     {

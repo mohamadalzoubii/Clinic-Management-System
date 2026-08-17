@@ -3,6 +3,7 @@
 namespace App\Actions\Medical\Doctor;
 
 use App\Models\Appointment;
+use App\Models\BlockedSlot;
 use App\Services\Medical\DoctorScheduleVersionService;
 use App\Services\TimeSlotGeneratorService;
 use App\Services\VacationService;
@@ -46,10 +47,18 @@ class GetDoctorAvailableSlotsAction
         }
 
         $bookedSlots = Appointment::where('doctor_id', $doctorId)
-            ->blockingTimeOnDate($date) 
+            ->blockingTimeOnDate($date)
             ->pluck('start_time')
-            ->map(fn($time) => Carbon::parse($time)->format('H:i'))
+            ->map(fn ($time) => Carbon::parse($time)->format('H:i'))
             ->toArray();
+
+        $blockedSlots = BlockedSlot::where('doctor_id', $doctorId)
+            ->whereDate('date', $date)
+            ->pluck('start_time')
+            ->map(fn ($time) => Carbon::parse($time)->format('H:i'))
+            ->toArray();
+
+        $bookedSlots = array_merge($bookedSlots, $blockedSlots);
 
         return $this->slotGenerator->generate(
             $schedule->start_time,
