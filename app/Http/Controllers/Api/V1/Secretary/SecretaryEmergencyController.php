@@ -6,6 +6,7 @@ use App\Actions\Medical\Doctor\GetDoctorAvailableDaysAction;
 use App\Actions\Medical\Doctor\GetDoctorAvailableSlotsAction;
 use App\Actions\Medical\Secretary\BlockSlotAction;
 use App\Actions\Medical\Secretary\CreateEmergencyBookingAction;
+use App\Actions\Medical\Secretary\GetAllSlotsForSecretaryAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Secretary\BlockSlotRequest;
 use App\Http\Requests\Secretary\EmergencyBookRequest;
@@ -65,5 +66,12 @@ class SecretaryEmergencyController extends Controller
             'message' => 'The appointment has been booked.',
             'data' => $appointment,
         ], 201);
+    }
+
+    public function allSlotsForBooking(Request $request, Doctor $doctor, GetAllSlotsForSecretaryAction $action)
+    {
+        $slots = $action->execute((string) $doctor->id, $request->query('date'));
+
+        return response()->json(['data' => $slots]);
     }
 }

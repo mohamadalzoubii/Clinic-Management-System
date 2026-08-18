@@ -65,4 +65,27 @@ class FinancialController extends Controller
 
         return $pdf->download("invoice_{$invoice->invoice_number}.pdf");
     }
+
+    public function emergencyInvoices(Request $request)
+    {
+        $page = max(1, $request->integer('page', 1));
+        $perPage = max(1, $request->integer('limit', 10));
+
+        $invoices = Invoice::query()
+            ->whereHas('appointment', function ($query) {
+                $query->where('reason', 'Emergency');
+            })
+            ->with(['appointment.patient.user', 'appointment.doctor.user', 'user'])
+            ->latest('id')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return $this->ok('Emergency invoices retrieved successfully.', [
+            'invoices' => InvoiceResource::collection($invoices->getCollection())->resolve(),
+            'meta' => [
+                'current_page' => $invoices->currentPage(),
+                'last_page' => $invoices->lastPage(),
+                'total' => $invoices->total(),
+            ],
+        ]);
+    }
 }

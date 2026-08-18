@@ -30,6 +30,14 @@ class StoreAppointmentAction
             $dayName = strtolower($date->englishDayOfWeek);
             $startTime = Carbon::parse($dto->time);
 
+            if ($date->isToday() && $startTime->lt(Carbon::now())) {
+                throw new BusinessLogicException('you cant book appointment at this time');
+            }
+
+            if ($date->isPast() && ! $date->isToday()) {
+                throw new BusinessLogicException('you cant book appointment at this time');
+            }
+
             if ($this->vacationService->isBlockingDate($dto->doctorId, $date)) {
                 throw new BusinessLogicException('Doctor is unavailable on the selected date.');
             }
@@ -71,7 +79,9 @@ class StoreAppointmentAction
                 );
             }
 
-            $invoice = $this->financialService->payForAppointmentAndCreateInvoice($appointment->loadMissing(['doctor.user', 'patient.user']));
+            $invoice = $this->financialService->payForAppointmentAndCreateInvoice($appointment->loadMissing([
+                'doctor.user', 'patient.user',
+            ]));
 
             return [
                 'appointment' => $appointment->load('attachments'),

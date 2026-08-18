@@ -194,6 +194,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/emergency-book', [SecretaryEmergencyController::class, 'emergencyBook']);
         Route::get('/doctors/{doctor}/available-days', [SecretaryEmergencyController::class, 'availableDays']);
         Route::post('/block-slot', [SecretaryEmergencyController::class, 'blockSlot']);
+        Route::get('/doctors/{doctor}/all-slots', [SecretaryEmergencyController::class, 'allSlotsForBooking']);
     });
 
     Route::middleware('role:secretary')->prefix('secretary')->group(function () {
@@ -233,6 +234,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', 'index');
         Route::post('/wallet/charge', 'purchasePackage');
         Route::get('/{invoice}/download', 'downloadInvoice');
+        Route::get('/emergency/list', 'emergencyInvoices');
     });
 
     Route::get('/doctors', [DoctorController::class, 'index']);

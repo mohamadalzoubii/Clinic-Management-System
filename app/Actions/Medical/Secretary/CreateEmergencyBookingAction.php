@@ -4,6 +4,7 @@ namespace App\Actions\Medical\Secretary;
 
 use App\Enums\Medical\AppointmentStatus;
 use App\Enums\UserStatus;
+use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
@@ -37,6 +38,10 @@ class CreateEmergencyBookingAction
                 ->lockForUpdate()
                 ->first();
 
+            if ($existingAppointment && $existingAppointment->reason === 'Emergency') {
+                throw new BusinessLogicException('Cannot override an existing emergency appointment.');
+            }
+
             if ($existingAppointment) {
                 $this->financialService->refundForEmergencyOverride($existingAppointment);
 
@@ -52,15 +57,23 @@ class CreateEmergencyBookingAction
             $slotDuration = 30; // ⚠️ شوف الملاحظة تحت
             $endTime = Carbon::parse($startTime)->addMinutes($slotDuration)->format('H:i');
 
-            return Appointment::create([
+            $appointment = Appointment::create([
                 'patient_id' => $patient->id,
                 'doctor_id' => $data['doctor_id'],
                 'appointment_date' => $date->format('Y-m-d'),
                 'start_time' => $startTime,
                 'end_time' => $endTime,
-                'status' => AppointmentStatus::CONFIRMED->value,
+                'status' => AppointmentStatus::PENDING->value,
                 'reason' => 'Emergency',
             ]);
+
+            $patient->user->increment('wallet_balance', $appointment->doctor->session_price);
+
+            $this->financialService->payForAppointmentAndCreateInvoice(
+                $appointment->loadMissing(['doctor.user', 'patient.user'])
+            );
+
+            return $appointment;
         });
     }
 
