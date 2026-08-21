@@ -441,11 +441,13 @@ class DatabaseSeeder extends Seeder
         $versionService->createVersionFromSchedules(
             $doctor,
             [
+                ['day_of_week' => 'sunday', 'start_time' => '09:00', 'end_time' => '12:00'],
                 ['day_of_week' => 'monday', 'start_time' => '09:00', 'end_time' => '12:00'],
                 ['day_of_week' => 'tuesday', 'start_time' => '09:00', 'end_time' => '12:00'],
                 ['day_of_week' => 'wednesday', 'start_time' => '09:00', 'end_time' => '12:00'],
                 ['day_of_week' => 'thursday', 'start_time' => '09:00', 'end_time' => '12:00'],
                 ['day_of_week' => 'friday', 'start_time' => '09:00', 'end_time' => '12:00'],
+                ['day_of_week' => 'saturday', 'start_time' => '09:00', 'end_time' => '12:00'],
             ],
             30,
             Carbon::today(),
@@ -458,6 +460,7 @@ class DatabaseSeeder extends Seeder
                 ['day_of_week' => 'monday', 'start_time' => '10:00', 'end_time' => '14:00'],
                 ['day_of_week' => 'wednesday', 'start_time' => '10:00', 'end_time' => '14:00'],
                 ['day_of_week' => 'friday', 'start_time' => '10:00', 'end_time' => '14:00'],
+                ['day_of_week' => 'saturday', 'start_time' => '10:00', 'end_time' => '14:00'],
             ],
             30,
             Carbon::today()->addDays(7),

@@ -11,7 +11,8 @@ use Throwable;
 
 class SqlRetrievalService
 {
-    private const ALLOWED_TABLES = ['appointments', 'doctors', 'doctor_schedules'];
+    // ← عدّلت الجدولين: طلعنا doctor_schedules (القديم/الميت) وضفنا الجدولين الفعليين
+    private const ALLOWED_TABLES = ['appointments', 'doctors', 'doctor_schedule_versions', 'doctor_schedule_version_items'];
 
     private const FORBIDDEN_KEYWORDS = [
         'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE',
@@ -19,6 +20,7 @@ class SqlRetrievalService
         'ATTACH', 'PRAGMA', 'CALL', 'INTO OUTFILE', 'LOAD_FILE',
     ];
 
+    // ← الـ schema الجديد بالكامل، بيعكس الموديلات الفعلية يلي بيستخدمها نظام الحجز
     private const SCHEMA_DESCRIPTION = <<<'SCHEMA'
 Table: doctors
   - id (integer, primary key)
@@ -27,9 +29,15 @@ Table: doctors
   - session_price (decimal)
   - gender (string)
 
-Table: doctor_schedules
+Table: doctor_schedule_versions
   - id (integer, primary key)
   - doctor_id (integer, foreign key referencing doctors.id)
+  - effective_from_date (date, format YYYY-MM-DD) -- the date this schedule version starts applying
+  - created_by_admin_id (integer)
+
+Table: doctor_schedule_version_items
+  - id (integer, primary key)
+  - doctor_schedule_version_id (integer, foreign key referencing doctor_schedule_versions.id)
   - day_of_week (string, e.g. "Monday", "Tuesday")
   - start_time (time, format HH:MM:SS)
   - end_time (time, format HH:MM:SS)
@@ -43,6 +51,32 @@ Table: appointments
   - start_time (time, format HH:MM:SS)
   - end_time (time, format HH:MM:SS)
   - status (string, one of: pending, confirmed, completed, cancelled, no_show)
+
+IMPORTANT — how doctor schedules work:
+A doctor can have MULTIPLE schedule versions over time (doctor_schedule_versions), each with its
+own effective_from_date. A version applies starting from that date until a newer version's
+effective_from_date is reached. This means the CURRENT working days/hours for a doctor are NEVER
+found by just reading all doctor_schedule_version_items for that doctor — you must first find the
+doctor's CURRENTLY ACTIVE version (the one with the latest effective_from_date that is <= today),
+and only read items belonging to THAT version.
+
+To find the current working days/hours for a doctor, always use this pattern:
+
+SELECT dswi.day_of_week, dswi.start_time, dswi.end_time, dswi.slot_duration
+FROM doctor_schedule_version_items dswi
+JOIN doctor_schedule_versions dsv ON dsv.id = dswi.doctor_schedule_version_id
+WHERE dsv.doctor_id = <doctor_id>
+  AND dswi.status = 'active'
+  AND dsv.effective_from_date = (
+      SELECT MAX(effective_from_date)
+      FROM doctor_schedule_versions
+      WHERE doctor_id = <doctor_id>
+        AND effective_from_date <= CURDATE()
+  )
+
+Never read doctor_schedule_version_items without joining/filtering by the doctor's currently
+active doctor_schedule_versions row as shown above — reading all versions/items for a doctor
+mixes past, current, and possibly future schedules together and gives wrong availability.
 SCHEMA;
 
     public function retrieve(string $question): ?array
@@ -69,9 +103,9 @@ SCHEMA;
 
         try {
             $rows = DB::select($sql);
-            Log::info('RAG: SQL executed', ['sql' => $sql, 'row_count' => count($rows)]);  // ← ضيف هاد
+            Log::info('RAG: SQL executed', ['sql' => $sql, 'row_count' => count($rows)]);
 
-            return DB::select($sql);
+            return $rows; // ← كان فيها DB::select($sql) مرتين (تنفيذ مزدوج بدون داعي)، صلّحتها
 
         } catch (Throwable $e) {
             Log::warning('RAG: SQL execution failed', ['sql' => $sql, 'error' => $e->getMessage()]);
@@ -103,6 +137,9 @@ Rules:
 - Output ONLY a single MySQL SELECT statement. No explanation, no markdown, no code fences, no semicolon.
 - Never use INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE or any other write/DDL statement.
 - Only reference the tables listed above. Never reference any other table.
+- When the question is about a doctor's working days/hours/availability, you MUST follow the
+  "IMPORTANT" pattern described in the schema above (filter to the currently active schedule
+  version only). Do not select from doctor_schedule_version_items without that filter.
 - Today's date is {$today} ({$dayName}).
 - If the question cannot be answered using only these tables, output exactly: NONE
 
@@ -138,7 +175,7 @@ PROMPT;
             return null;
         }
 
-        Log::info('RAG: Gemini generated SQL', ['sql' => $sql]);  // ← ضيف هاد
+        Log::info('RAG: Gemini generated SQL', ['sql' => $sql]);
 
         return $sql;
     }
