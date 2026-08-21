@@ -3,6 +3,7 @@
 namespace App\Actions\Appointment;
 
 use App\Enums\Medical\AppointmentStatus;
+use App\Events\AppointmentChanged;
 use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
 use App\Services\FinancialService;
@@ -39,6 +40,12 @@ class CancelAppointmentAction
 
             $settlement = $this->financialService->refundForPatientCancellation($appointment);
 
+            event(new AppointmentChanged(
+                doctorId: (int) $appointment->doctor_id,
+                appointmentId: (int) $appointment->id,
+                changeType: 'cancelled',
+            ));
+
             return [
                 'appointment' => $appointment->fresh(['doctor.user', 'patient.user', 'invoices']),
                 'refund_invoice' => $settlement['refund_invoice'],
@@ -65,6 +72,12 @@ class CancelAppointmentAction
             $appointment->save();
 
             $settlement = $this->financialService->refundForDoctorCancellation($appointment);
+
+            event(new AppointmentChanged(
+                doctorId: (int) $appointment->doctor_id,
+                appointmentId: (int) $appointment->id,
+                changeType: 'cancelled',
+            ));
 
             return [
                 'appointment' => $appointment->fresh(['doctor.user', 'patient.user', 'invoices']),

@@ -15,6 +15,10 @@ Broadcast::channel('chat.{conversationId}', function ($user, $conversationId) {
     return $isPatient || $isDoctor;
 }, ['guards' => ['sanctum']]); // <--- Crucial 3rd parameter
 
+Broadcast::channel('doctor.{doctorId}', function ($user, $doctorId) {
+    return $user->doctor && (int) $user->doctor->id === (int) $doctorId;
+}, ['guards' => ['sanctum']]);
+
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;

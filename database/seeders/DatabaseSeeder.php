@@ -318,7 +318,10 @@ class DatabaseSeeder extends Seeder
 
         // 6. Generate "The Living System" (Appointments, Consultations, Prescriptions, Invoices, Reviews)
         //    plus deterministic extra history for demo/testing.
-        $appointmentStatuses = AppointmentStatus::cases();
+        $appointmentStatuses = array_filter(
+            AppointmentStatus::cases(),
+            fn (AppointmentStatus $status) => $status !== AppointmentStatus::CONFIRMED,
+        );
 
         // Ensure Patient "Patient Test" has at least 3 COMPLETED appointments with Doctor "doctor Test".
         // Requirement: add 3 more completed appointments (do NOT delete existing ones).

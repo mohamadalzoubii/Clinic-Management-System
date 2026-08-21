@@ -4,6 +4,7 @@ namespace App\Actions\Appointment;
 
 use App\DTOs\Appointment\RescheduleAppointmentData;
 use App\Exceptions\BusinessLogicException;
+use App\Events\AppointmentChanged;
 use App\Models\Appointment;
 use App\Services\Medical\DoctorScheduleVersionService;
 use App\Services\VacationService;
@@ -81,6 +82,11 @@ class RescheduleAppointmentAction
                 'rescheduled' => true,
             ]);
 
+            event(new AppointmentChanged(
+                doctorId: (int) $appointment->doctor_id,
+                appointmentId: (int) $appointment->id,
+                changeType: 'rescheduled',
+            ));
 
             return $appointment->fresh(['doctor.user', 'patient.user']);
         });

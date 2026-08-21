@@ -4,6 +4,7 @@ namespace App\Actions\Appointment;
 
 use App\DTOs\Appointment\StorAppointmentData;
 use App\Enums\Medical\AppointmentStatus;
+use App\Events\AppointmentChanged;
 use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
 use App\Services\AttachmentService;
@@ -82,6 +83,12 @@ class StoreAppointmentAction
             $invoice = $this->financialService->payForAppointmentAndCreateInvoice($appointment->loadMissing([
                 'doctor.user', 'patient.user',
             ]));
+
+            event(new AppointmentChanged(
+                doctorId: (int) $appointment->doctor_id,
+                appointmentId: (int) $appointment->id,
+                changeType: 'booked',
+            ));
 
             return [
                 'appointment' => $appointment->load('attachments'),
