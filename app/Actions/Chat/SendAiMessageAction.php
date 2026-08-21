@@ -6,11 +6,13 @@ namespace App\Actions\Chat;
 
 use App\Models\Conversation;
 use App\Models\User;
-use App\Services\GeminiChatService;
+use App\Services\RagService;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SendAiMessageAction
 {
-    public function __construct(public readonly GeminiChatService $geminiService) {}
+    public function __construct(public readonly RagService $ragService) {}
 
     public function execute(User $user, string $messageBody)
     {
@@ -37,7 +39,12 @@ class SendAiMessageAction
             ];
         })->values()->toArray();
 
-        $aiReplyText = $this->geminiService->generateReply($chatHistory);
+        try {
+            $aiReplyText = $this->ragService->answer($messageBody, $chatHistory);
+        } catch (Throwable $e) {
+            Log::error('AI chat pipeline failed unexpectedly', ['error' => $e->getMessage()]);
+            $aiReplyText = 'عذراً، حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى لاحقاً.';
+        }
 
         $aiMessage = $conversation->messages()->create([
             'sender_user_id' => null,
