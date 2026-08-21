@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder
             ->create([
                 'user_status' => 'approved',
                 'password' => Hash::make('Password12'),
-                'wallet_balance' => rand(50, 300),
+                'wallet_balance' => 50,
             ]);
 
         foreach ($patients as $user) {
