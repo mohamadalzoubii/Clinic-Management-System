@@ -5,10 +5,13 @@ namespace App\Actions\Appointment;
 use App\Enums\Medical\AppointmentStatus;
 use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
+use App\Services\FinancialService;
 use Illuminate\Support\Facades\DB;
 
 class MarkAppointmentNoShowAction
 {
+    public function __construct(private readonly FinancialService $financialService) {}
+
     public function execute(Appointment $appointment, int $doctorId)
     {
         return DB::transaction(function () use ($appointment, $doctorId) {
@@ -26,6 +29,8 @@ class MarkAppointmentNoShowAction
             $appointment->update([
                 'status' => AppointmentStatus::NO_SHOW->value,
             ]);
+
+            $this->financialService->payoutForCompletion70_30($appointment);
 
             return $appointment->fresh(['doctor.user', 'patient.user']);
         });
