@@ -7,7 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class EmergencyOverrideNotification extends Notification implements ShouldQueue
+class SlotBlockedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -21,21 +21,22 @@ class EmergencyOverrideNotification extends Notification implements ShouldQueue
         return ['database', 'broadcast'];
     }
 
-    public function toBroadcast(object $notifiable)
+    public function toBroadcast(object $notifiable): array
     {
-        return [
-            'appointment_id' => $this->appointment->id,
-            'title' => 'Your Appointment Has Been Cancelled',
-            'body' => 'Your appointment has been cancelled due to an emergency override.',
-        ];
+        return $this->payload();
     }
 
     public function toArray(object $notifiable): array
     {
+        return $this->payload();
+    }
+
+    private function payload(): array
+    {
         return [
             'appointment_id' => $this->appointment->id,
             'title' => 'Your Appointment Has Been Cancelled',
-            'body' => 'Your appointment has been cancelled due to an emergency override.',
+            'body' => 'Your appointment has been cancelled due to this time slot being blocked by the clinic.',
         ];
     }
 }

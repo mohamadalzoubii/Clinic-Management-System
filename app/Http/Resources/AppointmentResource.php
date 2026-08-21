@@ -31,6 +31,7 @@ class AppointmentResource extends JsonResource
                 'reason' => $this->reason,
                 'notes' => $this->notes,
                 'reminder_sent' => $this->reminder_sent,
+                'rescheduled' => $this->rescheduled,
                 'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             ],
 

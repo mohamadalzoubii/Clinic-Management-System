@@ -15,8 +15,10 @@ use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\PatientResource;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Services\VacationService;
 use App\Traits\ApiResponses;
 use App\Traits\Filterable;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -24,13 +26,25 @@ class DoctorController extends Controller
 {
     use ApiResponses, Filterable;
 
-    public function index(DoctorFilter $filter)
+    public function index(DoctorFilter $filter, VacationService $vacationService)
     {
-        $doctors = Doctor::filter($filter)
+        $query = Doctor::filter($filter)
             ->whereNotIn('specialization', [
                 DoctorSpecialization::RADIOLOGIST->value,
                 DoctorSpecialization::PATHOLOGIST->value,
-            ])
+            ]);
+
+        if ($vacationService->vacationsTableExists()) {
+            $vacationService->syncExpiredVacations();
+
+            $query->whereDoesntHave('vacations', function ($vacationQuery) {
+                $vacationQuery->blocking()
+                    ->whereDate('start_date', '<=', Carbon::today())
+                    ->whereDate('end_date', '>=', Carbon::today());
+            });
+        }
+
+        $doctors = $query
             ->with('user')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
@@ -145,22 +159,28 @@ class DoctorController extends Controller
 
     public function specializations()
     {
+        $excludedSpecializations = [
+            DoctorSpecialization::RADIOLOGIST->value,
+            DoctorSpecialization::PATHOLOGIST->value,
+        ];
 
         $doctorsCount = Doctor::select('specialization', DB::raw('count(*) as count'))
+            ->whereNotIn('specialization', $excludedSpecializations)
             ->groupBy('specialization')
             ->pluck('count', 'specialization');
 
-        $specializationsStats = collect(DoctorSpecialization::cases())->map(function ($specialization) use (
-            $doctorsCount
-        ) {
-            return [
-                'specialization' => $specialization->value,
-                'doctors_count' => $doctorsCount->get($specialization->value, 0),
-            ];
-        });
+        $specializationsStats = collect(DoctorSpecialization::cases())
+            ->reject(fn ($specialization) => in_array($specialization->value, $excludedSpecializations, true))
+            ->map(function ($specialization) use ($doctorsCount) {
+                return [
+                    'specialization' => $specialization->value,
+                    'doctors_count' => $doctorsCount->get($specialization->value, 0),
+                ];
+            });
 
         return $this->ok('Specializations statistics retrieved successfully.', [
             'data' => $specializationsStats,
         ]);
     }
+
 }

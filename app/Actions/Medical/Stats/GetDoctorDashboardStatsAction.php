@@ -9,7 +9,7 @@ class GetDoctorDashboardStatsAction
 {
     public function execute(int $doctorId)
     {
-        $todayCount = Appointment::where('doctor_id', $doctorId)->today()->count();
+        $todayCount = Appointment::where('doctor_id', $doctorId)->today()->pending()->count();
 
         $pendingCount = Appointment::where('doctor_id', $doctorId)->pending()->count();
 

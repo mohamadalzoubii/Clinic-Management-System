@@ -4,6 +4,7 @@ namespace App\Actions\Medical\Consutation;
 
 use App\DTOs\Consultation\StoreConsultationDTO;
 use App\Enums\Medical\AppointmentStatus;
+use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
 use App\Models\Consultation;
 use App\Services\FinancialService;
@@ -21,6 +22,10 @@ class StoreConsultationAction
                 ->lockForUpdate()
                 ->with(['doctor.user', 'patient.user'])
                 ->firstOrFail();
+
+            if (! $appointment->isPending()) {
+                throw new BusinessLogicException('Only pending appointments can be completed.');
+            }
 
             $appointment->update(['status' => AppointmentStatus::COMPLETED->value]);
 

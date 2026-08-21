@@ -5,7 +5,7 @@ namespace App\Actions\Medical\Secretary;
 use App\Enums\Medical\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\BlockedSlot;
-use App\Notifications\EmergencyOverrideNotification;
+use App\Notifications\SlotBlockedNotification;
 use App\Services\FinancialService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +36,7 @@ class BlockSlotAction
                 ]);
 
                 $existingAppointment->patient->user->notify(
-                    new EmergencyOverrideNotification($existingAppointment)
+                    new SlotBlockedNotification($existingAppointment)
                 );
             }
 

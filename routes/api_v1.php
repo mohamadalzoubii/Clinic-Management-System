@@ -190,6 +190,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(['auth:sanctum'])->prefix('secretary')->group(function () {
         Route::get('/doctors', [SecretaryEmergencyController::class, 'doctors']);
+        Route::get('/doctors/count', [SecretaryEmergencyController::class, 'doctorsCount']);
         Route::get('/doctors/{doctor}/available-slots', [SecretaryEmergencyController::class, 'availableSlots']);
         Route::post('/emergency-book', [SecretaryEmergencyController::class, 'emergencyBook']);
         Route::get('/doctors/{doctor}/available-days', [SecretaryEmergencyController::class, 'availableDays']);
