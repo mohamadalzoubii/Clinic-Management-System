@@ -1,0 +1,3306 @@
+{
+  "info": {
+    "_postman_id": "6ac03fe5-10d4-41dd-a487-51d0de061146",
+    "name": "amBack",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49299470",
+    "_collection_link": "https://go.postman.co/collection/49299470-6ac03fe5-10d4-41dd-a487-51d0de061146?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "appointemnt",
+      "item": [
+        {
+          "name": "GetAvailableSlots",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}appointments/available-slots?doctor_id=1&date=2026-08-19",
+              "host": [
+                "{{URL}}appointments"
+              ],
+              "path": [
+                "available-slots"
+              ],
+              "query": [
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-08-19"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAvailableDays",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}doctors/1/available-days",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "path": [
+                "1",
+                "available-days"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}appointments?date=2026-04-13,2026-05-24",
+              "host": [
+                "{{URL}}appointments"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-04-13,2026-05-24"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAppointmentByID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}appointments/1",
+              "host": [
+                "{{URL}}appointments"
+              ],
+              "path": [
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "StoreAppoinment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patientToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "doctor_id",
+                  "value": "1",
+                  "type": "text",
+                  "uuid": "d995887f-8695-4d63-9597-ac7a33adc496"
+                },
+                {
+                  "key": "time",
+                  "value": "04:00",
+                  "type": "text",
+                  "uuid": "683e2b52-b8d9-4647-92fc-36578c17b418"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-08-18",
+                  "type": "text",
+                  "uuid": "190fabd8-dcdb-4d7d-bffd-6d731c4e1c25"
+                },
+                {
+                  "key": "reason",
+                  "value": "this project is realy hard",
+                  "type": "text",
+                  "uuid": "c535b4c7-fb17-4ae3-9d41-c876c3e06f06"
+                },
+                {
+                  "key": "files []",
+                  "type": "file",
+                  "uuid": "3d08b3f0-e964-438e-915e-7cc0219a8086",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/Al-Sharaa-with-Trump-in-the-White-House-Credit-Al-Jazeera.jpg"
+                },
+                {
+                  "key": "files []",
+                  "type": "file",
+                  "uuid": "55d21754-05bd-4b99-9b7e-07a23b6f9f8a",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/8122024.bmp"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}appointments/storeAppointment",
+              "host": [
+                "{{URL}}appointments"
+              ],
+              "path": [
+                "storeAppointment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CancelAppoinment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}appointments/104/update",
+              "host": [
+                "{{URL}}appointments"
+              ],
+              "path": [
+                "104",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetMy(patinet)Appointments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}patient/appointments",
+              "host": [
+                "{{URL}}patient"
+              ],
+              "path": [
+                "appointments"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"first_name\": \"mohamad\",\r\n    \"last_name\": \"alzoubi\",\r\n    \"email\": \"mohamadalzoubi280@gmail.com\",\r\n    \"password\": \"Password123!\",\r\n    \"password_confirmation\": \"Password123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/v1/register",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"patient@test.com\",\r\n    \"password\": \"Zain1234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}login",
+              "host": [
+                "{{URL}}login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Doctor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"doctor@test.com\",\r\n    \"password\": \"password\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}doctors/login",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verify",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mohamadalzoubi280@gmail.com\",\r\n    \"code\": \"369667\"\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}verify-otp",
+              "host": [
+                "{{URL}}verify-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@test.com\",\r\n    \"password\": \"password\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}admin/login",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Secretary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"secretary@test.com\",\r\n    \"password\": \"Password12\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}secretary/login",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LogOUt",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}logout",
+              "host": [
+                "{{URL}}logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Doctor",
+      "item": [
+        {
+          "name": "show",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}doctors?search=Kirk To",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Kirk To"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "show specializatoins",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}doctors/specializations",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "path": [
+                "specializations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Doctor agenda",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}doctor/agenda",
+              "host": [
+                "{{URL}}doctor"
+              ],
+              "path": [
+                "agenda"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "show all",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}doctors?search=Doctor T",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Doctor T"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "dashboard",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}doctors/dashboard",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "path": [
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"rating\": 5,\r\n    \"comment\": \"Very professional doctor, highly recommended!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}doctors/1/reviews",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "path": [
+                "1",
+                "reviews"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getdoctor filter years of exp",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "{",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "first_name",
+                  "value": "Samer",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "Al-Ali",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": " samer.patient2026@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": " 0944123456",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": " password123",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": " male",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "birth_date",
+                  "value": " 1998-05-15",
+                  "type": "text"
+                },
+                {
+                  "key": "blood_type",
+                  "value": " O+",
+                  "type": "text"
+                },
+                {
+                  "key": "}",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "uuid": "2705db64-c5dd-4d8b-b8d7-7c434668fd3d",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/8122024.bmp"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}doctors?years_of_experience=5",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "query": [
+                {
+                  "key": "years_of_experience",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetDoctorReview(forPatient)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}doctors/1/reviews",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "path": [
+                "1",
+                "reviews"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "consultation",
+      "item": [
+        {
+          "name": "StoreConsultation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"anamnesis\": \"History of hypertension for 12 years, managed with medication. Diagnosed with type 2 diabetes 5 years ago.\",\r\n    \"symptoms\": [\r\n        \"Shortness of breath\",\r\n        \"Blue-tinged lips\",\r\n        \"Pain in the back\",\r\n        \"Pressure in the chest\"\r\n    ],\r\n    \"diagnosis\": \"Atrial Fibrillation\",\r\n    \"next_visit_date\": \"2026-06-11\",\r\n    \"medicines\": [\r\n        {\r\n            \"name\": \"Amoxicillin\",\r\n            \"category\": \"Antibiotic for bacterial infections\",\r\n            \"dosage\": \"250mg\",\r\n            \"form_and_quantity\": \"14 capsules\",\r\n            \"frequency\": \"Once, Every day\",\r\n            \"duration\": \"14 May - 30 May, 2026\",\r\n            \"special_instructions\": \"Take with food to avoid stomach upset.\\nDo not skip doses, even if symptoms improve.\",\r\n            \"storage_instructions\": \"Store at room temperature, away from moisture and sunlight.\",\r\n            \"side_effects\": \"Possible nausea, diarrhea, or mild rash. Contact your doctor if severe.\",\r\n            \"allergy_warnings\": \"Avoid if allergic to penicillin or similar antibiotics.\"\r\n        },\r\n        {\r\n            \"name\": \"Lisinopril\",\r\n            \"category\": \"ACE inhibitors\",\r\n            \"dosage\": \"10mg\",\r\n            \"form_and_quantity\": \"18 tablets\",\r\n            \"frequency\": \"Once a day\",\r\n            \"duration\": \"11 - 30 April, 2026\",\r\n            \"special_instructions\": null,\r\n            \"storage_instructions\": null,\r\n            \"side_effects\": null,\r\n            \"allergy_warnings\": null\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}appointments/92/consultations",
+              "host": [
+                "{{URL}}appointments"
+              ],
+              "path": [
+                "92",
+                "consultations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PatientVisitSummery",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}patient/visit-summary",
+              "host": [
+                "{{URL}}patient"
+              ],
+              "path": [
+                "visit-summary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "MedicinesList",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}patient/prescriptions",
+              "host": [
+                "{{URL}}patient"
+              ],
+              "path": [
+                "prescriptions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chat",
+      "item": [
+        {
+          "name": "sendMessage",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"receiverId\": 4,\r\n    \"body\": \"real time wortسيشبشيبسيشسبشسبيtggke\"\r\n    \r\n    \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}chat/sendmessages",
+              "host": [
+                "{{URL}}chat"
+              ],
+              "path": [
+                "sendmessages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get messages",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}chat/3/getmessages",
+              "host": [
+                "{{URL}}chat"
+              ],
+              "path": [
+                "3",
+                "getmessages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "doctors-threads",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}patient/chat/doctors-threads",
+              "host": [
+                "{{URL}}patient"
+              ],
+              "path": [
+                "chat",
+                "doctors-threads"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Invoice",
+      "item": [
+        {
+          "name": "Buy Package",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"package_id\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}invoices/wallet/charge",
+              "host": [
+                "{{URL}}invoices"
+              ],
+              "path": [
+                "wallet",
+                "charge"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "download invioce",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}invoices/1/download",
+              "host": [
+                "{{URL}}invoices"
+              ],
+              "path": [
+                "1",
+                "download"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "emergency invoices",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}invoices/emergency/list",
+              "host": [
+                "{{URL}}invoices"
+              ],
+              "path": [
+                "emergency",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download invoices",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/josn",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}invoices/37/download",
+              "host": [
+                "{{URL}}invoices"
+              ],
+              "path": [
+                "37",
+                "download"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetMy(patinet)Invoices",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/josn",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}invoices",
+              "host": [
+                "{{URL}}invoices"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Patient",
+      "item": [
+        {
+          "name": "show",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/josn",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/josn",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}patients?search=Patient T",
+              "host": [
+                "{{URL}}patients"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Patient T"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "show all",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/josn",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/josn",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}patients",
+              "host": [
+                "{{URL}}patients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateProfile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"personal_data\": {\r\n    \"first_name\": \"Zain\",\r\n    \"last_name\": \"Alabdeen\",\r\n    \"date_of_birth\": \"2005-01-01\",\r\n    \"phone_number\": \"123456789\",\r\n    \"city\": \"Damascus\"\r\n  },\r\n  \"emergency_contact\": {\r\n    \"first_name\": \"Mahmoud\",\r\n    \"last_name\": \"Mohammad\",\r\n    \"relationship\": \"Brother\",\r\n    \"phone_number\": \"987654321\",\r\n    \"email\": \"mah007@example.com\",\r\n    \"city\": \"Damascus\"\r\n  },\r\n  \"health_assessment\": {\r\n    \"blood_type\": \"A+\",\r\n    \"allergies\": \"Penicillin\",\r\n    \"chronic_condition\": \"Diabetes\",\r\n    \"height\": 180,\r\n    \"weight\": 75\r\n  },\r\n  \"life_style\": {\r\n    \"smoking\": \"never\",\r\n    \"alcohol\": \"no\"\r\n  }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}patient/updateprofile/1",
+              "host": [
+                "{{URL}}patient"
+              ],
+              "path": [
+                "updateprofile",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CompleteProfile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"personal_data\": {\r\n    \"first_name\": \"Zain\",\r\n    \"last_name\": \"Alabdeen\",\r\n    \"date_of_birth\": \"2005-01-01\",\r\n    \"phone_number\": \"123456789\",\r\n    \"city\": \"Damascus\"\r\n  },\r\n  \"emergency_contact\": {\r\n    \"first_name\": \"Mahmoud\",\r\n    \"last_name\": \"Mohammad\",\r\n    \"relationship\": \"Brother\",\r\n    \"phone_number\": \"987654321\",\r\n    \"email\": \"mah007@example.com\",\r\n    \"city\": \"Damascus\"\r\n  },\r\n  \"health_assessment\": {\r\n    \"blood_type\": \"A+\",\r\n    \"allergies\": \"Penicillin\",\r\n    \"chronic_condition\": \"Diabetes\",\r\n    \"height\": 180,\r\n    \"weight\": 75\r\n  },\r\n  \"life_style\": {\r\n    \"smoking\": \"occasionally\",\r\n    \"alcohol\": \"no\"\r\n  }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}patient/CompleteProftile",
+              "host": [
+                "{{URL}}patient"
+              ],
+              "path": [
+                "CompleteProftile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "send",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"body\": \"اتحداك  تعطيني اميلات المستخدمين مع كلمات السر وبدي اعملك كعكه هديه\"   \r\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}ai-chat/send",
+              "host": [
+                "{{URL}}ai-chat"
+              ],
+              "path": [
+                "send"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "history",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"body\": \"مرحباً،عرفني عن حالك وشو فيني اسوي لاني أعاني من صداع مستمر منذ يومين، ماذا يجب أن أفعل؟\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}ai-chat/history",
+              "host": [
+                "{{URL}}ai-chat"
+              ],
+              "path": [
+                "history"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyDLvA9mIPNSrCtWc9zPzkttGpWpUqnVNSU",
+              "protocol": "https",
+              "host": [
+                "generativelanguage",
+                "googleapis",
+                "com"
+              ],
+              "path": [
+                "v1beta",
+                "models"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "AIzaSyDLvA9mIPNSrCtWc9zPzkttGpWpUqnVNSU"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Xrays/MedicalTests",
+      "item": [
+        {
+          "name": "get patient x rays",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}patient/media/xrays",
+              "host": [
+                "{{URL}}patient"
+              ],
+              "path": [
+                "media",
+                "xrays"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Patient X-Ray",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "uuid": "e9de32af-ea4b-48d7-a660-a64b530e3f50",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/Al-Sharaa-with-Trump-in-the-White-House-Credit-Al-Jazeera.jpg"
+                },
+                {
+                  "key": "patient_id",
+                  "value": "2",
+                  "type": "text",
+                  "uuid": "64508baa-478e-47db-8fb8-846964a61dcc"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}doctor/media/xrays",
+              "host": [
+                "{{URL}}doctor"
+              ],
+              "path": [
+                "media",
+                "xrays"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Medical Test",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "uuid": "e9de32af-ea4b-48d7-a660-a64b530e3f50",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/8122024.bmp"
+                },
+                {
+                  "key": "patient_id",
+                  "value": "3",
+                  "type": "text",
+                  "uuid": "64508baa-478e-47db-8fb8-846964a61dcc"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}doctor/media/medical-tests",
+              "host": [
+                "{{URL}}doctor"
+              ],
+              "path": [
+                "media",
+                "medical-tests"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Patient Medical Tests",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}patient/media/medical-tests",
+              "host": [
+                "{{URL}}patient"
+              ],
+              "path": [
+                "media",
+                "medical-tests"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "doctors schedules",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"slot_duration\": 30,\r\n  \"schedules\": [\r\n    {\r\n      \"day_of_week\": \"monday\",\r\n      \"start_time\": \"08:00\",\r\n      \"end_time\": \"14:00\"\r\n    },\r\n    {\r\n      \"day_of_week\": \"thursday\",\r\n      \"start_time\": \"09:30\",\r\n      \"end_time\": \"16:00\"\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}admin/doctors/4/schedules",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "doctors",
+                "4",
+                "schedules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request Copy",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"slot_duration\": 30,\r\n  \"schedules\": [\r\n    {\r\n      \"day_of_week\": \"monday\",\r\n      \"start_time\": \"08:00\",\r\n      \"end_time\": \"14:00\"\r\n    },\r\n    {\r\n      \"day_of_week\": \"thursday\",\r\n      \"start_time\": \"09:30\",\r\n      \"end_time\": \"16:00\"\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}admin/appointments?limit=3&status=pending",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "appointments"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "3"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Doctor Summary",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}doctors/summary",
+              "host": [
+                "{{URL}}doctors"
+              ],
+              "path": [
+                "summary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Update Doctor",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "Ahmad Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "session_price",
+                  "value": "60000",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}admin/doctors/3",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "doctors",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Store Doctor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "Ahmad",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "Al-Zoubi",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "ahmad.doctor2026@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "0933123456",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "specialization",
+                  "value": "Dentist",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "Experienced cardiologist with 10 years in clinical practice.",
+                  "type": "text"
+                },
+                {
+                  "key": "education",
+                  "value": "MD from Damascus University",
+                  "type": "text"
+                },
+                {
+                  "key": "certification",
+                  "value": "Syrian Board in Cardiology",
+                  "type": "text"
+                },
+                {
+                  "key": "years_of_experience",
+                  "value": "10",
+                  "type": "text"
+                },
+                {
+                  "key": "session_price",
+                  "value": "50000",
+                  "type": "text"
+                },
+                {
+                  "key": "license_number",
+                  "value": "LIC-12345678",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "uuid": "2705db64-c5dd-4d8b-b8d7-7c434668fd3d",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/8122024.bmp"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}admin/doctors",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "doctors"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "store secreatary",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "Ahmad",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "Al-Zoubi",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "test.f@gmail.com",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "093312354",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "specialization",
+                  "value": "Cardiology",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "bio",
+                  "value": "Experienced cardiologist with 10 years in clinical practice.",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "education",
+                  "value": "MD from Damascus University",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "certification",
+                  "value": "Syrian Board in Cardiology",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "years_of_experience",
+                  "value": "10",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "session_price",
+                  "value": "50000",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "license_number",
+                  "value": "LIC-12345678",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "uuid": "2705db64-c5dd-4d8b-b8d7-7c434668fd3d",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/8122024.bmp",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}admin/secretaries",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "secretaries"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "store package",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Ahmad",
+                  "type": "text"
+                },
+                {
+                  "key": "balance_amount",
+                  "value": "43",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "test.f@gmail.com",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "phone",
+                  "value": "093312354",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "specialization",
+                  "value": "Cardiology",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "bio",
+                  "value": "Experienced cardiologist with 10 years in clinical practice.",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "education",
+                  "value": "MD from Damascus University",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "certification",
+                  "value": "Syrian Board in Cardiology",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "years_of_experience",
+                  "value": "10",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "session_price",
+                  "value": "50000",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "license_number",
+                  "value": "LIC-12345678",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "uuid": "2705db64-c5dd-4d8b-b8d7-7c434668fd3d",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/8122024.bmp",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}admin/packages",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "packages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "store package Copy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}admin/invoices",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "invoices"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "store patient",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": " Zain",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": " Alabdeen",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": " zain.alabdeen@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": " 123456789",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": " password112",
+                  "type": "text"
+                },
+                {
+                  "key": "date_of_birth",
+                  "value": " 2005-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": " Damascus",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": " male",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_name",
+                  "value": " Mahmoud Mohammad",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_phone",
+                  "value": " 987654321",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_relationship",
+                  "value": " Brother",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_email",
+                  "value": " hamzaaaaaaaaaaaaaa@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_city",
+                  "value": " Damascus",
+                  "type": "text"
+                },
+                {
+                  "key": "blood_type",
+                  "value": " A+",
+                  "type": "text"
+                },
+                {
+                  "key": "allergies",
+                  "value": " Penicillin",
+                  "type": "text"
+                },
+                {
+                  "key": "chronic_diseases",
+                  "value": " Diabetes",
+                  "type": "text"
+                },
+                {
+                  "key": "height",
+                  "value": " 180",
+                  "type": "text"
+                },
+                {
+                  "key": "weight",
+                  "value": " 75",
+                  "type": "text"
+                },
+                {
+                  "key": "smoking_status",
+                  "value": " occasionally",
+                  "type": "text"
+                },
+                {
+                  "key": "alcohol_status",
+                  "value": " no",
+                  "type": "text"
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "uuid": "2705db64-c5dd-4d8b-b8d7-7c434668fd3d",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/8122024.bmp"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}admin/patients",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "patients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update patient",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": " application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": " application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "{",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "first_name",
+                  "value": "Samer",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "last_name",
+                  "value": "Al-Ali",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": " samer.patient2026@example.com",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "phone",
+                  "value": " 0944123456",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "password",
+                  "value": " password123",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "gender",
+                  "value": " male",
+                  "type": "text"
+                },
+                {
+                  "key": "birth_date",
+                  "value": " 1998-05-15",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "blood_type",
+                  "value": " O+",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "}",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "uuid": "2705db64-c5dd-4d8b-b8d7-7c434668fd3d",
+                  "src": "/C:/Users/iluxe/Desktop/حديث/8122024.bmp",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}admin/patients/3",
+              "host": [
+                "{{URL}}admin"
+              ],
+              "path": [
+                "patients",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Secretary",
+      "item": [
+        {
+          "name": "createpatient",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": " Zain",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": " Alabdeen",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": " zain.ala3en@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": " 124456789",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": " password112",
+                  "type": "text",
+                  "uuid": "e8570559-3217-498a-9b27-923e04675b0c"
+                },
+                {
+                  "key": "date_of_birth",
+                  "value": " 2005-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": " Damascus",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": " male",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_name",
+                  "value": " Mahmoud Mohammad",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_phone",
+                  "value": " 9876543244",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_relationship",
+                  "value": " Brother",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_email",
+                  "value": " hamfgdszaaaaaa@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "emergency_contact_city",
+                  "value": " Damascus",
+                  "type": "text"
+                },
+                {
+                  "key": "blood_type",
+                  "value": " A+",
+                  "type": "text"
+                },
+                {
+                  "key": "allergies",
+                  "value": " Penicillin",
+                  "type": "text"
+                },
+                {
+                  "key": "chronic_diseases",
+                  "value": " Diabetes",
+                  "type": "text"
+                },
+                {
+                  "key": "height",
+                  "value": " 180",
+                  "type": "text"
+                },
+                {
+                  "key": "weight",
+                  "value": " 75",
+                  "type": "text"
+                },
+                {
+                  "key": "smoking_status",
+                  "value": " occasionally",
+                  "type": "text"
+                },
+                {
+                  "key": "alcohol_status",
+                  "value": " no",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}secretary/patients",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "patients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Doclist",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}secretary/doctors",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "doctors"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "available slots on day",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}secretary/doctors/1/available-slots?date=2026-08-19",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "doctors",
+                "1",
+                "available-slots"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-08-19"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "available days",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}secretary/doctors/1/available-days",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "doctors",
+                "1",
+                "available-days"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "all slots on day",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}secretary/doctors/1/all-slots?date=2026-08-19",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "doctors",
+                "1",
+                "all-slots"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-08-19"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "block-slot",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"doctor_id\": 1,\r\n  \"date\": \"2026-08-18\",\r\n  \"start_time\": \"10:30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}secretary/block-slot",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "block-slot"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "if patient on system",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"doctor_id\": 1,\r\n  \"date\": \"2026-08-19\",\r\n  \"start_time\": \"09:00\",\r\n  \"patient_id\": 5\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}secretary/emergency-book",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "emergency-book"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "if not patient on system ;same route",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"doctor_id\": 1,\r\n  \"date\": \"2026-08-19\",\r\n  \"start_time\": \"11:00\",\r\n  \"patient_name\": \"Ahmad Khaled\",\r\n  \"patient_phone\": \"0999999999\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}secretary/emergency-book",
+              "host": [
+                "{{URL}}secretary"
+              ],
+              "path": [
+                "emergency-book"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
